@@ -22,10 +22,19 @@ elsewhere: the database and the uploaded files. Both have free tiers.
    the detected framework (Next.js); `vercel.json` sets the build command to
    `prisma migrate deploy && next build`, so every deploy applies pending
    migrations before it builds.
-2. **Database.** In the Vercel project open **Storage → Create → Neon** (or
-   any Postgres provider). Connecting it adds `DATABASE_URL` to the project's
-   environment. If the provider gives you a *pooled* and a *direct* URL,
-   either works for this app.
+2. **Database.** Any hosted Postgres works: Supabase, Neon (both free), or
+   a provider from Vercel's Storage tab. Set `DATABASE_URL` to its
+   connection string. With **Supabase**, use the *Session pooler* URI (port
+   5432): the direct connection is IPv6-only on the free plan, which Vercel
+   cannot reach. Keep the database password to letters and digits, or
+   URL-encode any special characters (`@` becomes `%40`).
+
+   Hosted poolers admit only a handful of clients (Supabase's session pooler
+   allows 15), and Vercel may run many function instances at once, so the
+   app keeps a pool of just 2 connections per instance on Vercel and drops
+   idle ones after five seconds (`src/lib/db.ts`). If you ever see
+   "max clients reached", lower `DATABASE_POOL_MAX` to 1 or move to the
+   provider's transaction-mode pooler.
 3. **Uploads.** Open **Storage → Create → Blob** and set the access to
    **Private**. Connecting it gives the deployment permission to read and
    write the store. Then add the environment variables
