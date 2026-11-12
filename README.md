@@ -145,7 +145,8 @@ docs/                architecture and deployment notes
 ```
 
 Read `docs/architecture.md` for how the pieces fit and why, and
-`docs/deployment.md` for what it would take to run this outside a laptop.
+`docs/deployment.md` for deploying to Vercel (with Neon and Vercel Blob) and
+what it would take to run this for real.
 
 ## Uploads
 

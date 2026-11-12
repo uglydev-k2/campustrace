@@ -1,12 +1,17 @@
 import "server-only";
 import { LocalDiskStorage } from "./local-disk";
+import { VercelBlobStorage } from "./vercel-blob";
 
 /**
  * Where uploaded bytes live.
  *
- * The rest of the app only knows this interface. To move to object storage
- * (S3, Cloudflare R2, Google Cloud Storage...) write another class that
- * implements it and return that from `createStorage` below. Nothing else
+ * The rest of the app only knows this interface. Two implementations exist:
+ *
+ *   STORAGE_DRIVER=local        (default) a folder on disk, see local-disk.ts
+ *   STORAGE_DRIVER=vercel-blob  a private Vercel Blob store, see vercel-blob.ts
+ *
+ * To add another (S3, Cloudflare R2, Google Cloud Storage...) write a class
+ * that implements it and add a case to `createStorage` below. Nothing else
  * needs to change, because pages never link to files directly: every file is
  * served by src/app/api/files/[id]/route.ts after a permission check.
  */
@@ -18,7 +23,15 @@ export interface FileStorage {
 }
 
 function createStorage(): FileStorage {
-  return new LocalDiskStorage(process.env.UPLOAD_DIR ?? "./storage/uploads");
+  const driver = process.env.STORAGE_DRIVER ?? "local";
+  switch (driver) {
+    case "local":
+      return new LocalDiskStorage(process.env.UPLOAD_DIR ?? "./storage/uploads");
+    case "vercel-blob":
+      return new VercelBlobStorage(process.env.UPLOAD_DIR ?? "uploads");
+    default:
+      throw new Error(`Unknown STORAGE_DRIVER "${driver}". Use "local" or "vercel-blob".`);
+  }
 }
 
 const globalForStorage = globalThis as unknown as { fileStorage?: FileStorage };

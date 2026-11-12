@@ -13,15 +13,44 @@ about what would need to change to run it for a campus.
 - Any managed PostgreSQL (Neon, Supabase, RDS, a university server) works
   unchanged.
 
+## Deploying to Vercel
+
+Vercel runs the app as serverless functions, so two things must live
+elsewhere: the database and the uploaded files. Both have free tiers.
+
+1. **Push the repository to GitHub** and import it at vercel.com/new. Keep
+   the detected framework (Next.js); `vercel.json` sets the build command to
+   `prisma migrate deploy && next build`, so every deploy applies pending
+   migrations before it builds.
+2. **Database.** In the Vercel project open **Storage → Create → Neon** (or
+   any Postgres provider). Connecting it adds `DATABASE_URL` to the project's
+   environment. If the provider gives you a *pooled* and a *direct* URL,
+   either works for this app.
+3. **Uploads.** Open **Storage → Create → Blob** and set the access to
+   **Private**. Connecting it gives the deployment permission to read and
+   write the store. Then add the environment variables
+   `STORAGE_DRIVER=vercel-blob` and `UPLOAD_DIR=uploads` (the folder prefix
+   inside the store).
+4. **Remaining environment variables** (Settings → Environment Variables):
+   - `NEXTAUTH_SECRET`: output of `openssl rand -base64 32`
+   - `NEXTAUTH_URL`: the site's address, e.g. `https://campustrace.vercel.app`
+   - `ALLOWED_EMAIL_DOMAINS`: `stu.ucc.edu.gh,ucc.edu.gh`
+5. **Deploy**, then load the demo data once from your laptop, pointing the
+   seed at the hosted database:
+   `DATABASE_URL="<the Neon URL>" npm run db:seed`
+
+After that, every push to `main` redeploys. The seed replaces all data, so do
+not run it again once real reports exist.
+
 ## Limitations to fix before real use
 
-1. **Uploads are on local disk.** `LocalDiskStorage` writes under
-   `UPLOAD_DIR`. On serverless hosts (Vercel, Netlify) the filesystem is
-   ephemeral and per-instance, so files would vanish. Implement `FileStorage`
-   over S3-compatible object storage (`src/server/storage`) and return it
-   from `createStorage()`. Keep serving files through `/api/files/[id]` so the
-   permission check stays in place, or issue short-lived signed URLs from
-   that route.
+1. **Local-disk uploads do not survive on serverless hosts.** The default
+   `STORAGE_DRIVER=local` writes under `UPLOAD_DIR`, which on Vercel or
+   Netlify is ephemeral and per-instance. Use `STORAGE_DRIVER=vercel-blob`
+   there (above), or implement `FileStorage` over S3-compatible object
+   storage (`src/server/storage`) and add it to `createStorage()`. Keep
+   serving files through `/api/files/[id]` so the permission check stays in
+   place.
 2. **The rate limiter is in memory.** `src/server/rate-limit.ts` is per
    process and resets on restart. With more than one instance, back it with
    Redis or a database table.
