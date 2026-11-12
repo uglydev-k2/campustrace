@@ -1,0 +1,268 @@
+// CampusTrace data model.
+// Read docs/workflow.md alongside this file: the enums below are the states
+// of the return workflow, and src/lib/workflow/rules.ts decides which moves
+// between them are allowed.
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum Role {
+  STUDENT
+  ADMIN
+}
+
+enum ReportKind {
+  FOUND
+  LOST
+}
+
+/// FOUND reports move OPEN -> IN_CUSTODY -> RETURNED.
+/// LOST reports move OPEN -> RETURNED.
+/// Either kind can be CLOSED (withdrawn or removed) while it is still OPEN.
+enum ReportStatus {
+  OPEN
+  IN_CUSTODY
+  RETURNED
+  CLOSED
+}
+
+enum Category {
+  ELECTRONICS
+  ID_AND_BANK_CARDS
+  KEYS
+  BAGS
+  WALLETS
+  BOOKS_AND_NOTES
+  CLOTHING
+  JEWELLERY_AND_WATCHES
+  OTHER
+}
+
+/// SUBMITTED -> APPROVED -> COLLECTION_SCHEDULED -> HANDED_OVER -> COMPLETED
+/// with REJECTED and WITHDRAWN as the two ways a claim can end early.
+enum ClaimStatus {
+  SUBMITTED
+  APPROVED
+  COLLECTION_SCHEDULED
+  HANDED_OVER
+  COMPLETED
+  REJECTED
+  WITHDRAWN
+}
+
+enum AttachmentPurpose {
+  REPORT_PHOTO
+  CLAIM_EVIDENCE
+}
+
+enum EventType {
+  REPORT_PUBLISHED
+  CUSTODY_RECORDED
+  CLAIM_SUBMITTED
+  CLAIM_APPROVED
+  CLAIM_REJECTED
+  CLAIM_WITHDRAWN
+  COLLECTION_SCHEDULED
+  HANDOVER_RECORDED
+  RECEIPT_CONFIRMED
+  REPORT_RESOLVED
+  REPORT_CLOSED
+}
+
+model User {
+  id            String   @id @default(cuid())
+  name          String
+  email         String   @unique
+  passwordHash  String
+  role          Role     @default(STUDENT)
+  studentNumber String?
+  createdAt     DateTime @default(now())
+
+  reports         Report[]        @relation("ReportReporter")
+  custodyRecords  Report[]        @relation("ReportCustodyRecorder")
+  claims          Claim[]         @relation("ClaimClaimant")
+  reviewedClaims  Claim[]         @relation("ClaimReviewer")
+  handovers       Claim[]         @relation("ClaimHandoverOfficer")
+  attachments     Attachment[]
+  events          WorkflowEvent[]
+  notifications   Notification[]
+}
+
+/// A staffed desk where finders drop items off and owners collect them.
+model CollectionPoint {
+  id           String  @id @default(cuid())
+  name         String  @unique
+  location     String
+  openingHours String
+  isActive     Boolean @default(true)
+
+  plannedDropOffs Report[] @relation("ReportDropOffPoint")
+  heldItems       Report[] @relation("ReportCustodyPoint")
+}
+
+model Report {
+  id        String       @id @default(cuid())
+  /// Short human-friendly code, e.g. CT-7KQ2MX. Finders quote it at the desk.
+  reference String       @unique
+  kind      ReportKind
+  status    ReportStatus @default(OPEN)
+
+  title       String
+  category    Category
+  /// Shown to everyone. Finders are asked to keep identifying details out of it.
+  description String
+  /// Shown only to the reporter and administrators. Used to verify claims.
+  privateDetails String?
+  /// One of the campus areas in src/lib/constants.ts.
+  area        String
+  /// Free-text detail, e.g. "second floor, near the photocopier".
+  locationDetail String?
+  /// The day the item was found or lost.
+  occurredOn  DateTime @db.Date
+  /// When false the photo is visible only to the reporter and administrators.
+  photoPublic Boolean  @default(true)
+
+  reporterId String
+  reporter   User   @relation("ReportReporter", fields: [reporterId], references: [id])
+
+  // --- Found items only: where the finder plans to drop the item off -------
+  dropOffPointId String?
+  dropOffPoint   CollectionPoint? @relation("ReportDropOffPoint", fields: [dropOffPointId], references: [id])
+
+  // --- Found items only: filled in when an administrator records custody ---
+  custodyPointId      String?
+  custodyPoint        CollectionPoint? @relation("ReportCustodyPoint", fields: [custodyPointId], references: [id])
+  custodyTag          String?
+  custodyRecordedAt   DateTime?
+  custodyRecordedById String?
+  custodyRecordedBy   User?            @relation("ReportCustodyRecorder", fields: [custodyRecordedById], references: [id])
+
+  closedReason String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  photos       Attachment[]
+  /// Claims made on this found item.
+  claims       Claim[]         @relation("ClaimReport")
+  /// Claims that cite this lost report as supporting evidence.
+  citedByClaims Claim[]        @relation("ClaimLostReport")
+  events       WorkflowEvent[]
+
+  @@index([kind, status, createdAt])
+  @@index([reporterId])
+}
+
+model Claim {
+  id        String      @id @default(cuid())
+  reference String      @unique
+  status    ClaimStatus @default(SUBMITTED)
+
+  /// The found item being claimed.
+  reportId String
+  report   Report @relation("ClaimReport", fields: [reportId], references: [id])
+
+  claimantId String
+  claimant   User   @relation("ClaimClaimant", fields: [claimantId], references: [id])
+
+  /// Optional link to the claimant's own lost report.
+  lostReportId String?
+  lostReport   Report? @relation("ClaimLostReport", fields: [lostReportId], references: [id])
+
+  /// The claimant's private proof of ownership. Never shown to the finder.
+  statement String
+
+  // --- Review ---------------------------------------------------------------
+  reviewNote   String?
+  reviewedAt   DateTime?
+  reviewedById String?
+  reviewedBy   User?     @relation("ClaimReviewer", fields: [reviewedById], references: [id])
+
+  // --- Collection -----------------------------------------------------------
+  collectionAt   DateTime?
+  collectionNote String?
+
+  // --- Handover -------------------------------------------------------------
+  handedOverAt   DateTime?
+  handoverNote   String?
+  handedOverById String?
+  handedOverBy   User?     @relation("ClaimHandoverOfficer", fields: [handedOverById], references: [id])
+
+  receiptConfirmedAt DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  evidence Attachment[]
+  events   WorkflowEvent[]
+
+  /// A student can claim a given item once.
+  @@unique([reportId, claimantId])
+  @@index([status, createdAt])
+  @@index([claimantId])
+}
+
+/// Metadata for an uploaded file. The bytes live in the storage driver
+/// (src/server/storage) under `storageKey`; they are never in /public.
+model Attachment {
+  id           String            @id @default(cuid())
+  purpose      AttachmentPurpose
+  storageKey   String            @unique
+  originalName String
+  mimeType     String
+  sizeBytes    Int
+
+  reportId String?
+  report   Report? @relation(fields: [reportId], references: [id], onDelete: Cascade)
+  claimId  String?
+  claim    Claim?  @relation(fields: [claimId], references: [id], onDelete: Cascade)
+
+  uploadedById String
+  uploadedBy   User     @relation(fields: [uploadedById], references: [id])
+  createdAt    DateTime @default(now())
+
+  @@index([reportId])
+  @@index([claimId])
+}
+
+/// Append-only workflow history. Rows are only ever inserted.
+/// Events with a claimId are private to the claimant and administrators;
+/// events without one are part of the report's public timeline.
+model WorkflowEvent {
+  id      String    @id @default(cuid())
+  type    EventType
+  message String
+
+  reportId String
+  report   Report  @relation(fields: [reportId], references: [id], onDelete: Cascade)
+  claimId  String?
+  claim    Claim?  @relation(fields: [claimId], references: [id], onDelete: Cascade)
+  actorId  String?
+  actor    User?   @relation(fields: [actorId], references: [id])
+
+  createdAt DateTime @default(now())
+
+  @@index([reportId, createdAt])
+  @@index([claimId, createdAt])
+}
+
+model Notification {
+  id     String @id @default(cuid())
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  title String
+  body  String
+  /// In-app link to the report or claim the notification is about.
+  href  String
+
+  readAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  @@index([userId, readAt, createdAt])
+}

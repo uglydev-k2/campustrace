@@ -1,0 +1,28 @@
+# The PostgreSQL database for local development.
+#
+#   npm run db:up     start it (data is kept in a named volume)
+#   npm run db:down   stop it
+#
+# The user name, password and port match DATABASE_URL in .env.example.
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: campustrace
+      POSTGRES_PASSWORD: campustrace
+      POSTGRES_DB: campustrace
+    ports:
+      # Only reachable from your own machine.
+      - "127.0.0.1:5432:5432"
+    volumes:
+      - campustrace-db:/var/lib/postgresql/data
+      - ./docker/init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U campustrace -d campustrace"]
+      interval: 3s
+      timeout: 3s
+      retries: 20
+
+volumes:
+  campustrace-db:
