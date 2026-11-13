@@ -6,7 +6,7 @@ import { notFound, redirect } from "next/navigation";
 import { cache } from "react";
 import { db } from "@/lib/db";
 import { loginSchema } from "@/lib/validation";
-import { loginLimiter } from "@/server/rate-limit";
+import { clear, clientAddress, consume, isBlocked, LIMITS } from "@/server/rate-limit";
 
 /**
  * Authentication uses NextAuth.js (Auth.js v4) with email and password.
@@ -26,22 +26,38 @@ export const authOptions: NextAuthOptions = {
         email: { label: "Email", type: "email" },
         password: { label: "Password", type: "password" },
       },
-      async authorize(credentials) {
+      async authorize(credentials, req) {
         const parsed = loginSchema.safeParse(credentials);
         if (!parsed.success) return null;
         const { email, password } = parsed.data;
 
-        // Slow down password guessing: 8 attempts per email every 10 minutes.
-        if (!loginLimiter.allow(email)) return null;
+        // Slow down password guessing. Failed attempts are counted per email
+        // and per client address; the counters live in the database so they
+        // hold across server instances. Throwing (rather than returning
+        // null) lets the form show a "try again later" message.
+        const address = clientAddress(req?.headers as Record<string, string> | undefined);
+        const emailKey = `login:email:${email}`;
+        const ipKey = `login:ip:${address}`;
+        const [emailBlocked, ipBlocked] = await Promise.all([
+          isBlocked(emailKey, LIMITS.loginPerEmail),
+          isBlocked(ipKey, LIMITS.loginPerIp),
+        ]);
+        if (emailBlocked || ipBlocked) throw new Error("RateLimited");
 
         const user = await db.user.findUnique({ where: { email } });
         // Compare against a dummy hash when the user does not exist so the
         // response takes the same time either way.
         const hash = user?.passwordHash ?? DUMMY_HASH;
         const matches = await bcrypt.compare(password, hash);
-        if (!user || !matches) return null;
+        if (!user || !matches) {
+          await Promise.all([
+            consume(emailKey, LIMITS.loginPerEmail),
+            consume(ipKey, LIMITS.loginPerIp),
+          ]);
+          return null;
+        }
 
-        loginLimiter.reset(email);
+        await clear(emailKey);
         return { id: user.id, name: user.name, email: user.email };
       },
     }),

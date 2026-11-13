@@ -33,6 +33,10 @@ export function LoginForm({ next }: { next: string }) {
       return;
     }
     setPending(false);
+    if (result?.error === "RateLimited") {
+      setError("Too many sign-in attempts. Wait ten minutes and try again.");
+      return;
+    }
     // Deliberately vague: we do not reveal whether the email exists.
     setError("That email and password do not match. Check both and try again.");
   }

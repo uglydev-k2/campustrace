@@ -23,6 +23,33 @@ test.describe("access control", () => {
     await expect(page.getByRole("alert").filter({ hasText: "do not match" })).toBeVisible();
   });
 
+  test("repeated wrong passwords lock the account out for a while", async ({ page }) => {
+    // Esi is used for nothing else, so locking her out does not disturb
+    // the other tests. The limit is 8 failures per email in 10 minutes.
+    await page.goto("/login");
+    for (let attempt = 0; attempt < 8; attempt += 1) {
+      await page.getByLabel("University email").fill(USERS.esi);
+      await page.getByLabel("Password").fill(`wrong-${attempt}`);
+      await page.getByRole("button", { name: "Sign in" }).click();
+      await expect(page.getByRole("alert").filter({ hasText: "do not match" })).toBeVisible();
+    }
+    // The ninth attempt is refused even with the right password.
+    await page.getByLabel("University email").fill(USERS.esi);
+    await page.getByLabel("Password").fill("CampusTrace1!");
+    await page.getByRole("button", { name: "Sign in" }).click();
+    await expect(page.getByRole("alert").filter({ hasText: "Too many sign-in attempts" })).toBeVisible();
+  });
+
+  test("responses carry the hardening headers", async ({ request }) => {
+    const response = await request.get("/");
+    const headers = response.headers();
+    expect(headers["x-frame-options"]).toBe("DENY");
+    expect(headers["x-content-type-options"]).toBe("nosniff");
+    expect(headers["content-security-policy"]).toContain("frame-ancestors 'none'");
+    expect(headers["content-security-policy"]).toContain("form-action 'self'");
+    expect(headers["permissions-policy"]).toContain("camera=()");
+  });
+
   test("students cannot open the desk area", async ({ browser }) => {
     const student = await signedInPage(browser, USERS.yaw);
     const response = await student.goto("/admin");

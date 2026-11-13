@@ -144,7 +144,8 @@ e2e/                 Playwright tests
 docs/                architecture and deployment notes
 ```
 
-Read `docs/architecture.md` for how the pieces fit and why, and
+Read `docs/architecture.md` for how the pieces fit and why,
+`docs/security.md` for the security, privacy and data-integrity review, and
 `docs/deployment.md` for deploying to Vercel (with Neon and Vercel Blob) and
 what it would take to run this for real.
 

@@ -60,9 +60,10 @@ not run it again once real reports exist.
    storage (`src/server/storage`) and add it to `createStorage()`. Keep
    serving files through `/api/files/[id]` so the permission check stays in
    place.
-2. **The rate limiter is in memory.** `src/server/rate-limit.ts` is per
-   process and resets on restart. With more than one instance, back it with
-   Redis or a database table.
+2. **Rate limiting uses the database.** Sign-in and registration limits
+   are counters in the `RateLimit` table, so they hold across instances.
+   They rely on the platform setting `X-Forwarded-For` for the client
+   address; behind no proxy every client shares one bucket.
 3. **Notifications are in-app only.** There is no email or SMS. Adding a
    provider (for example Resend or Postmark) would be one call inside
    `notify()` in `src/server/services/shared.ts`.

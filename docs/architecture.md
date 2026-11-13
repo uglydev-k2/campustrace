@@ -89,7 +89,8 @@ the signal that closes the loop for the finder's "thank you" notification.
 
 ## Authorisation and privacy
 
-Priority one in the brief, so it is worth listing what is enforced:
+Priority one in the brief. `docs/security.md` is the full review with
+evidence; in brief:
 
 - **Private details.** A found report's `privateDetails` (the identifying
   feature the finder kept back) is readable by the finder and the desk only.
@@ -102,8 +103,8 @@ Priority one in the brief, so it is worth listing what is enforced:
 - **Roles.** Desk accounts cannot claim items; finders cannot claim their own
   report; students cannot open `/admin` or act on claims that are not theirs.
 - **Sign-in.** bcrypt password hashes, HTTP-only JWT session cookie, a fixed
-  message for wrong email *or* password, and a per-email rate limit of eight
-  attempts per ten minutes. Registration is limited to the university email
+  message for wrong email *or* password, and database-backed limits on
+  failed sign-ins (per email and per client address) and on registrations. Registration is limited to the university email
   domains in `ALLOWED_EMAIL_DOMAINS`.
 - **Input.** Every action parses its input with Zod on the server. Uploads
   are checked by magic bytes (`src/lib/file-types.ts`), capped in size and

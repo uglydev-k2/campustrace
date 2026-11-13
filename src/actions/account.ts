@@ -1,7 +1,10 @@
 "use server";
 
 import bcrypt from "bcryptjs";
+import { headers } from "next/headers";
 import { db } from "@/lib/db";
+import { Prisma } from "@/generated/prisma/client";
+import { clientAddress, consume, LIMITS } from "@/server/rate-limit";
 import { errorState, formText, successState, type FormState } from "@/lib/form-state";
 import { fieldErrors, registerSchema } from "@/lib/validation";
 
@@ -38,21 +41,34 @@ export async function registerAction(_prev: FormState, formData: FormData): Prom
     });
   }
 
-  const existing = await db.user.findUnique({ where: { email }, select: { id: true } });
-  if (existing) {
-    return errorState("Check the highlighted fields.", {
-      email: ["An account with this email already exists. Sign in instead."],
-    });
+  const address = clientAddress(await headers());
+  if (!(await consume(`register:ip:${address}`, LIMITS.registerPerIp))) {
+    return errorState("Too many new accounts from this connection. Try again in an hour.");
   }
 
-  await db.user.create({
-    data: {
-      name,
-      email,
-      studentNumber,
-      passwordHash: await bcrypt.hash(password, 10),
-      role: "STUDENT",
-    },
+  const alreadyExists = errorState("Check the highlighted fields.", {
+    email: ["An account with this email already exists. Sign in instead."],
   });
+  const existing = await db.user.findUnique({ where: { email }, select: { id: true } });
+  if (existing) return alreadyExists;
+
+  try {
+    await db.user.create({
+      data: {
+        name,
+        email,
+        studentNumber,
+        passwordHash: await bcrypt.hash(password, 10),
+        role: "STUDENT",
+      },
+    });
+  } catch (error) {
+    // Two registrations for the same email at the same instant: the unique
+    // index on email rejects the second one, and we say so plainly.
+    if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2002") {
+      return alreadyExists;
+    }
+    throw error;
+  }
   return successState("Account created.");
 }

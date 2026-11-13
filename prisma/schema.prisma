@@ -266,3 +266,12 @@ model Notification {
 
   @@index([userId, readAt, createdAt])
 }
+
+/// Fixed-window counters for rate limiting (sign-in attempts, registrations).
+/// Kept in the database so the limit holds across server instances and
+/// restarts; an in-memory counter would be per instance on serverless hosts.
+model RateLimit {
+  key     String   @id
+  count   Int
+  resetAt DateTime
+}
