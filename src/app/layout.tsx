@@ -9,34 +9,18 @@ import "./globals.css";
 /*
  * Fonts are served from src/fonts by next/font/local: no request to a font
  * CDN, and Next.js preloads them and reserves space to avoid layout shift.
- *
- * Fraunces is a variable font with weight, optical-size, softness and "wonk"
- * axes; the softness is set in globals.css. The "-ext" files hold Latin
- * Extended characters (ɛ, ɔ...) and are only downloaded when a page uses one.
+ * Geist is the interface face; Geist Mono is used only for reference codes.
  */
-const fraunces = localFont({
-  src: "../fonts/fraunces-latin.woff2",
-  variable: "--font-fraunces",
+const geist = localFont({
+  src: "../fonts/geist-sans-variable.woff2",
+  variable: "--font-geist",
   weight: "100 900",
   display: "swap",
 });
-const frauncesExt = localFont({
-  src: "../fonts/fraunces-latin-ext.woff2",
-  variable: "--font-fraunces-ext",
+const geistMono = localFont({
+  src: "../fonts/geist-mono-variable.woff2",
+  variable: "--font-geist-mono",
   weight: "100 900",
-  display: "swap",
-  preload: false,
-});
-const atkinson = localFont({
-  src: "../fonts/atkinson-next-latin.woff2",
-  variable: "--font-atkinson",
-  weight: "200 800",
-  display: "swap",
-});
-const atkinsonExt = localFont({
-  src: "../fonts/atkinson-next-latin-ext.woff2",
-  variable: "--font-atkinson-ext",
-  weight: "200 800",
   display: "swap",
   preload: false,
 });
@@ -50,13 +34,11 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#10233f",
+  themeColor: "#ffffff",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
-  const fontVariables = [fraunces, frauncesExt, atkinson, atkinsonExt]
-    .map((font) => font.variable)
-    .join(" ");
+  const fontVariables = [geist, geistMono].map((font) => font.variable).join(" ");
 
   return (
     <html lang="en" className={`${fontVariables} h-full antialiased`}>
@@ -64,7 +46,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         {/* Lets keyboard users jump past the navigation. */}
         <a
           href="#main"
-          className="btn btn-primary sr-only focus-visible:not-sr-only focus-visible:fixed focus-visible:top-3 focus-visible:left-3 focus-visible:z-50"
+          className="btn btn-primary sr-only focus-visible:not-sr-only focus-visible:fixed focus-visible:top-3 focus-visible:left-3 focus-visible:z-[60]"
         >
           Skip to main content
         </a>

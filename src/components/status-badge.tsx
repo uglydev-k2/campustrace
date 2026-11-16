@@ -1,11 +1,11 @@
 import type { Tone } from "@/lib/labels";
 
 const TONES: Record<Tone, string> = {
-  brand: "border-brand-600 bg-brand-50 text-brand-800",
-  lost: "border-lost-700 bg-lost-50 text-lost-800",
-  returned: "border-returned-700 bg-returned-50 text-returned-800",
-  danger: "border-danger-700 bg-danger-50 text-danger-800",
-  neutral: "border-line-strong bg-sunken text-ink-soft",
+  brand: "bg-brand-50 text-brand-800 ring-brand-100",
+  lost: "bg-lost-50 text-lost-800 ring-lost-100",
+  returned: "bg-returned-50 text-returned-800 ring-returned-100",
+  danger: "bg-danger-50 text-danger-800 ring-danger-100",
+  neutral: "bg-sunken text-ink-soft ring-line",
 };
 
 const DOTS: Record<Tone, string> = {
@@ -23,7 +23,7 @@ const DOTS: Record<Tone, string> = {
 export function StatusBadge({ text, tone }: { text: string; tone: Tone }) {
   return (
     <span
-      className={`inline-flex items-center gap-1.5 rounded-sm border px-2 py-0.5 text-caption font-bold ${TONES[tone]}`}
+      className={`inline-flex items-center gap-1.5 rounded-sm px-2 py-0.5 text-caption font-medium ring-1 ring-inset ${TONES[tone]}`}
     >
       <span aria-hidden className={`size-1.5 rounded-full ${DOTS[tone]}`} />
       {text}

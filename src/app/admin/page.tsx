@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
+import { ChevronRight } from "lucide-react";
 import Link from "next/link";
+import { PageHeader } from "@/components/page-header";
 import { StatusBadge } from "@/components/status-badge";
 import { requireAdmin } from "@/lib/auth";
 import { db } from "@/lib/db";
@@ -63,42 +65,51 @@ export default async function AdminPage() {
 
   type ClaimRow = (typeof toReview)[number];
   const claimRow = (claim: ClaimRow, detail: string) => (
-    <li key={claim.id} className="flex flex-wrap items-center justify-between gap-x-6 gap-y-2 px-4 py-3.5 sm:px-5">
+    <li
+      key={claim.id}
+      className="group relative flex flex-wrap items-center justify-between gap-x-6 gap-y-2 px-4 py-3.5 transition-colors focus-within:bg-paper hover:bg-paper sm:px-5"
+    >
       <div className="min-w-0">
-        <p className="font-bold">
-          <Link href={`/claims/${claim.id}`} className="hover:underline">
+        <p className="text-small font-medium text-ink">
+          <Link href={`/claims/${claim.id}`} className="after:absolute after:inset-0">
             {claim.report.title}
           </Link>
         </p>
-        <p className="text-small text-ink-soft">
-          <span className="type-reference">{claim.reference}</span>, {claim.claimant.name}. {detail}
+        <p className="mt-0.5 text-caption text-ink-soft">
+          <span className="type-reference text-ink-faint">{claim.reference}</span> {claim.claimant.name}. {detail}
         </p>
       </div>
       <div className="flex items-center gap-3">
         <StatusBadge {...claimStatusLabel(claim.status)} />
-        <Link href={`/claims/${claim.id}`} className="btn btn-secondary btn-small">
-          Open<span className="sr-only"> claim {claim.reference}</span>
-        </Link>
+        <ChevronRight
+          aria-hidden
+          className="size-4 text-ink-faint transition-transform duration-200 group-hover:translate-x-0.5"
+        />
       </div>
     </li>
   );
 
   return (
-    <div className="container-page py-10">
-      <h1 className="type-page">Collection desk</h1>
-      <p className="mt-2 max-w-2xl text-ink-soft">
-        Work through the queues from top to bottom. {unclaimed}{" "}
-        {unclaimed === 1 ? "item in custody has" : "items in custody have"} no open claim.
-      </p>
+    <>
+      <PageHeader
+        title="Collection desk"
+        description={`Work through the queues from top to bottom. ${unclaimed} ${
+          unclaimed === 1 ? "item in custody has" : "items in custody have"
+        } no open claim.`}
+      >
+        <nav aria-label="Queues" className="mt-8 -mx-4 overflow-x-auto px-4 sm:mx-0 sm:px-0">
+          <ol className="grid min-w-[40rem] grid-cols-6 divide-x divide-line overflow-hidden rounded-lg border border-line bg-paper">
+            <QueueLink step={1} href="#drop-off" count={awaitingDropOff.length} label="Awaiting drop-off" />
+            <QueueLink step={2} href="#review" count={toReview.length} label="Claims to review" />
+            <QueueLink step={3} href="#blocked" count={blocked.length} label="Waiting for item" />
+            <QueueLink step={4} href="#schedule" count={toSchedule.length} label="Ready to schedule" />
+            <QueueLink step={5} href="#collections" count={scheduled.length} label="Collections booked" />
+            <QueueLink step={6} href="#receipt" count={awaitingReceipt.length} label="Awaiting receipt" />
+          </ol>
+        </nav>
+      </PageHeader>
 
-      <nav aria-label="Queues" className="mt-8 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
-        <QueueLink href="#drop-off" count={awaitingDropOff.length} label="Awaiting drop-off" />
-        <QueueLink href="#review" count={toReview.length} label="Claims to review" />
-        <QueueLink href="#blocked" count={blocked.length} label="Waiting for item" />
-        <QueueLink href="#schedule" count={toSchedule.length} label="Ready to schedule" />
-        <QueueLink href="#collections" count={scheduled.length} label="Collections booked" />
-        <QueueLink href="#receipt" count={awaitingReceipt.length} label="Awaiting receipt" />
-      </nav>
+    <div className="container-page space-y-6 pt-8">
 
       <Queue
         id="drop-off"
@@ -107,20 +118,23 @@ export default async function AdminPage() {
         empty="No finders are on their way."
       >
         {awaitingDropOff.map((report) => (
-          <li key={report.id} className="flex flex-wrap items-center justify-between gap-x-6 gap-y-2 px-4 py-3.5 sm:px-5">
+          <li
+            key={report.id}
+            className="group relative flex flex-wrap items-center justify-between gap-x-6 gap-y-2 px-4 py-3.5 transition-colors focus-within:bg-paper hover:bg-paper sm:px-5"
+          >
             <div className="min-w-0">
-              <p className="font-bold">
-                <Link href={`/reports/${report.id}`} className="hover:underline">
+              <p className="text-small font-medium text-ink">
+                <Link href={`/reports/${report.id}`} className="after:absolute after:inset-0">
                   {report.title}
                 </Link>
               </p>
-              <p className="text-small text-ink-soft">
-                <span className="type-reference">{report.reference}</span>, reported{" "}
+              <p className="mt-0.5 text-caption text-ink-soft">
+                <span className="type-reference text-ink-faint">{report.reference}</span> Reported{" "}
                 {formatDate(report.createdAt)}. Expected at {report.dropOffPoint?.name ?? "a collection point"}.
                 {report._count.claims > 0 && ` ${report._count.claims} claim${report._count.claims === 1 ? "" : "s"} waiting.`}
               </p>
             </div>
-            <Link href={`/reports/${report.id}`} className="btn btn-secondary btn-small">
+            <Link href={`/reports/${report.id}`} className="btn btn-secondary btn-small relative z-10">
               Record custody<span className="sr-only"> for {report.reference}</span>
             </Link>
           </li>
@@ -177,20 +191,37 @@ export default async function AdminPage() {
         {awaitingReceipt.map((claim) => claimRow(claim, "Handed over."))}
       </Queue>
     </div>
+    </>
   );
 }
 
-function QueueLink({ href, count, label }: { href: string; count: number; label: string }) {
+/** One cell of the queue strip: the queue's place in the workflow, its size and name. */
+function QueueLink({ step, href, count, label }: { step: number; href: string; count: number; label: string }) {
+  const busy = count > 0;
   return (
-    <a
-      href={href}
-      className={`rounded-lg border p-3 transition-colors hover:border-navy-700 ${
-        count > 0 ? "border-line-strong bg-surface" : "border-line bg-paper text-ink-soft"
-      }`}
-    >
-      <span className="type-section block">{count}</span>
-      <span className="text-small font-bold">{label}</span>
-    </a>
+    <li className="first:rounded-l-lg last:rounded-r-lg">
+      <a
+        href={href}
+        className={`group flex h-full flex-col gap-3 p-3.5 transition-colors first:rounded-l-lg hover:bg-surface ${
+          busy ? "bg-surface" : ""
+        }`}
+      >
+        <span className="flex items-center justify-between">
+          <span className="type-reference text-[0.6875rem] text-ink-faint">{step}</span>
+          {busy && <span aria-hidden className="size-1.5 rounded-full bg-brand-600" />}
+        </span>
+        <span>
+          <span
+            className={`block text-[1.375rem] leading-none font-semibold tracking-tight tabular-nums ${
+              busy ? "text-ink" : "text-ink-faint"
+            }`}
+          >
+            {count}
+          </span>
+          <span className={`mt-1 block text-caption ${busy ? "text-ink-soft" : "text-ink-faint"}`}>{label}</span>
+        </span>
+      </a>
+    </li>
   );
 }
 
@@ -208,13 +239,22 @@ function Queue({
   children: React.ReactNode[];
 }) {
   return (
-    <section id={id} className="mt-12 scroll-mt-24">
-      <h2 className="type-section">{title}</h2>
-      <p className="mt-1 text-ink-soft">{intro}</p>
+    <section id={id} className="panel scroll-mt-20 overflow-hidden shadow-xs">
+      <div className="flex flex-wrap items-start justify-between gap-x-6 gap-y-1 border-b border-line px-4 py-3.5 sm:px-5">
+        <div className="min-w-0">
+          <div className="flex items-center gap-2">
+            <h2 className="type-card">{title}</h2>
+            <span className="rounded-sm bg-sunken px-1.5 py-px text-caption font-medium text-ink-soft tabular-nums">
+              {children.length}
+            </span>
+          </div>
+          <p className="mt-0.5 text-caption text-ink-soft">{intro}</p>
+        </div>
+      </div>
       {children.length === 0 ? (
-        <p className="mt-4 rounded-lg border border-dashed border-line-strong px-5 py-4 text-ink-soft">{empty}</p>
+        <p className="px-4 py-5 text-small text-ink-faint sm:px-5">{empty}</p>
       ) : (
-        <ul className="panel mt-4 divide-y divide-line">{children}</ul>
+        <ul className="divide-y divide-line">{children}</ul>
       )}
     </section>
   );

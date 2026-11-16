@@ -1,7 +1,9 @@
+import { ChevronRight, FileText, Inbox } from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { ItemTag } from "@/components/item-tag";
 import { Notice } from "@/components/notice";
+import { EmptyState, PageHeader } from "@/components/page-header";
 import { StatusBadge } from "@/components/status-badge";
 import { requireUser } from "@/lib/auth";
 import { db } from "@/lib/db";
@@ -57,80 +59,107 @@ export default async function DashboardPage({ searchParams }: PageProps<"/dashbo
   const firstName = user.name.split(" ")[0];
 
   return (
-    <div className="container-page py-10">
-      <Notice code={typeof notice === "string" ? notice : undefined} />
-      <h1 className="type-page">Welcome back, {firstName}</h1>
-      <p className="mt-2 text-ink-soft">Everything you have reported or claimed is listed here.</p>
-
-      <section className="mt-10">
-        <h2 className="type-section">My claims</h2>
-        {claims.length === 0 ? (
-          <div className="panel mt-4 p-6">
-            <p className="text-ink-soft">
-              You have not claimed anything. If you have lost something, see whether it has been
-              handed in.
-            </p>
-            <Link href="/browse?kind=FOUND" className="btn btn-secondary mt-4">
-              Browse found items
-            </Link>
-          </div>
-        ) : (
-          <ul className="panel mt-4 divide-y divide-line">
-            {claims.map((claim) => (
-              <li key={claim.id} className="flex flex-wrap items-center justify-between gap-x-6 gap-y-2 p-4 sm:px-5">
-                <div className="min-w-0">
-                  <p className="type-card">
-                    <Link href={`/claims/${claim.id}`} className="hover:underline">
-                      {claim.report.title}
-                    </Link>
-                  </p>
-                  <p className="text-small text-ink-soft">
-                    <span className="type-reference">{claim.reference}</span>, submitted{" "}
-                    {formatDate(claim.createdAt)}
-                  </p>
-                  <p className={`mt-1 text-small ${claim.status === "HANDED_OVER" ? "font-bold text-brand-800" : "text-ink-soft"}`}>
-                    {claimHint(claim.status, claim.report.status, claim.collectionAt)}
-                  </p>
-                </div>
-                <div className="flex items-center gap-3">
-                  <StatusBadge {...claimStatusLabel(claim.status)} />
-                  <Link href={`/claims/${claim.id}`} className="btn btn-secondary btn-small">
-                    Open<span className="sr-only"> claim on {claim.report.title}</span>
-                  </Link>
-                </div>
-              </li>
-            ))}
-          </ul>
-        )}
-      </section>
-
-      <section className="mt-12">
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <h2 className="type-section">My reports</h2>
-          <div className="flex flex-wrap gap-2">
-            <Link href="/report/found" className="btn btn-primary btn-small">
+    <>
+      <PageHeader
+        title={`Welcome back, ${firstName}`}
+        description="Everything you have reported or claimed is listed here."
+        actions={
+          <>
+            <Link href="/report/found" className="btn btn-primary">
               I found something
             </Link>
-            <Link href="/report/lost" className="btn btn-secondary btn-small">
+            <Link href="/report/lost" className="btn btn-secondary">
               I lost something
             </Link>
-          </div>
-        </div>
-        {reports.length === 0 ? (
-          <p className="panel mt-4 p-6 text-ink-soft">
-            You have not reported anything yet. Reports you publish appear here so you can follow
-            them.
-          </p>
-        ) : (
-          <ul className="mt-5 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-            {reports.map((card) => (
-              <li key={card.id}>
-                <ItemTag card={card} />
-              </li>
-            ))}
-          </ul>
-        )}
-      </section>
+          </>
+        }
+      />
+
+      <div className="container-page space-y-12 pt-8">
+        <Notice code={typeof notice === "string" ? notice : undefined} />
+
+        <section>
+          <SectionTitle title="My claims" count={claims.length} />
+          {claims.length === 0 ? (
+            <EmptyState
+              icon={<Inbox aria-hidden className="size-5" />}
+              title="No claims yet"
+              actions={
+                <Link href="/browse?kind=FOUND" className="btn btn-secondary">
+                  Browse found items
+                </Link>
+              }
+            >
+              You have not claimed anything. If you have lost something, see whether it has been
+              handed in.
+            </EmptyState>
+          ) : (
+            <ul className="panel divide-y divide-line overflow-hidden shadow-xs">
+              {claims.map((claim) => (
+                <li
+                  key={claim.id}
+                  className="group relative flex flex-wrap items-center justify-between gap-x-6 gap-y-3 px-4 py-4 transition-colors focus-within:bg-paper hover:bg-paper sm:px-5"
+                >
+                  <div className="min-w-0">
+                    <p className="type-card">
+                      <Link href={`/claims/${claim.id}`} className="after:absolute after:inset-0">
+                        {claim.report.title}
+                      </Link>
+                    </p>
+                    <p className="mt-0.5 text-caption text-ink-faint">
+                      <span className="type-reference">{claim.reference}</span>, submitted{" "}
+                      {formatDate(claim.createdAt)}
+                    </p>
+                    <p
+                      className={`mt-1.5 text-small ${claim.status === "HANDED_OVER" ? "font-medium text-brand-800" : "text-ink-soft"}`}
+                    >
+                      {claimHint(claim.status, claim.report.status, claim.collectionAt)}
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <StatusBadge {...claimStatusLabel(claim.status)} />
+                    <ChevronRight
+                      aria-hidden
+                      className="size-4 text-ink-faint transition-transform duration-200 group-hover:translate-x-0.5"
+                    />
+                  </div>
+                </li>
+              ))}
+            </ul>
+          )}
+        </section>
+
+        <section>
+          <SectionTitle title="My reports" count={reports.length} />
+          {reports.length === 0 ? (
+            <EmptyState icon={<FileText aria-hidden className="size-5" />} title="No reports yet">
+              You have not reported anything yet. Reports you publish appear here so you can follow
+              them.
+            </EmptyState>
+          ) : (
+            <ul className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              {reports.map((card) => (
+                <li key={card.id}>
+                  <ItemTag card={card} />
+                </li>
+              ))}
+            </ul>
+          )}
+        </section>
+      </div>
+    </>
+  );
+}
+
+function SectionTitle({ title, count }: { title: string; count: number }) {
+  return (
+    <div className="mb-4 flex items-center gap-2.5">
+      <h2 className="type-section">{title}</h2>
+      {count > 0 && (
+        <span className="rounded-sm bg-surface px-1.5 py-0.5 text-caption font-medium text-ink-soft tabular-nums ring-1 ring-line ring-inset">
+          {count}
+        </span>
+      )}
     </div>
   );
 }

@@ -6,12 +6,12 @@ run time.
 
 | Files | Typeface | Licence |
 | --- | --- | --- |
-| `fraunces-*.woff2` | Fraunces, Copyright 2020 The Fraunces Project Authors (github.com/undercasetype/Fraunces) | SIL Open Font License 1.1 |
-| `atkinson-next-*.woff2` | Atkinson Hyperlegible Next, Copyright 2020-2024 The Atkinson Hyperlegible Next Project Authors (github.com/googlefonts/atkinson-hyperlegible-next) | SIL Open Font License 1.1 |
+| `geist-sans-variable.woff2` | Geist, Copyright (c) 2023 Vercel, in collaboration with basement.studio | SIL Open Font License 1.1 |
+| `geist-mono-variable.woff2` | Geist Mono, Copyright (c) 2023 Vercel, in collaboration with basement.studio | SIL Open Font License 1.1 |
 
-The WOFF2 files were copied unmodified from the `@fontsource-variable/fraunces`
-and `@fontsource-variable/atkinson-hyperlegible-next` npm packages (version
-5.3.0). The full licence text is at https://openfontlicense.org.
+The WOFF2 files were copied unmodified from the `geist` npm package
+(version 1.9.2). The full licence text is at https://openfontlicense.org.
 
-The `latin-ext` files cover characters such as ɛ and ɔ, so Akan names and
-place names render in the same typeface as the rest of the page.
+Geist does not include the Ghanaian letters ɛ and ɔ. The font stacks in
+`src/app/globals.css` fall back to the system sans-serif for those
+characters, so Akan names and place names still render correctly.

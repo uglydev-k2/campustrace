@@ -7,6 +7,7 @@ import {
   ActionForm,
   CheckboxField,
   FileField,
+  FormSection,
   FormStatus,
   SelectField,
   SubmitButton,
@@ -38,11 +39,18 @@ export function ReportForm({
   const sensitive = SENSITIVE_CATEGORIES.includes(category as CategoryValue);
 
   return (
-    <ActionForm action={createReportAction} className="space-y-10">
+    <ActionForm action={createReportAction} className="space-y-8">
       <input type="hidden" name="kind" value={kind} />
 
-      <fieldset className="space-y-5">
-        <legend className="type-section mb-5">About the item</legend>
+      <FormSection
+        id="about"
+        title="About the item"
+        description={
+          found
+            ? "What it is, described so the owner recognises it but cannot simply copy it."
+            : "What you lost, described so a finder or the desk can recognise it."
+        }
+      >
         <TextField
           name="title"
           label="What is it?"
@@ -78,10 +86,13 @@ export function ReportForm({
           }
           maxLength={600}
         />
-      </fieldset>
+      </FormSection>
 
-      <fieldset className="space-y-5">
-        <legend className="type-section mb-5">Where and when</legend>
+      <FormSection
+        id="where"
+        title="Where and when"
+        description="The place and day narrow the search for everyone."
+      >
         <SelectField
           name="area"
           label={found ? "Where did you find it?" : "Where do you think you lost it?"}
@@ -102,10 +113,13 @@ export function ReportForm({
           max={today}
           defaultValue={today}
         />
-      </fieldset>
+      </FormSection>
 
-      <fieldset className="space-y-5">
-        <legend className="type-section mb-5">Photo</legend>
+      <FormSection
+        id="photo"
+        title="Photo"
+        description="A photo helps, but you decide whether the public sees it."
+      >
         <FileField
           name="photo"
           label="Photo of the item"
@@ -115,7 +129,7 @@ export function ReportForm({
           preview
         />
         {sensitive ? (
-          <p className="flex items-start gap-2.5 rounded-md border border-line-strong bg-sunken px-3 py-2.5 text-small text-ink-soft">
+          <p className="flex animate-rise items-start gap-2.5 rounded-lg border border-line bg-paper p-3.5 text-small text-ink-soft">
             <EyeOff aria-hidden className="mt-0.5 size-4 shrink-0" />
             Photos of ID and bank cards are never shown publicly. Only desk staff will see this
             one.
@@ -128,11 +142,14 @@ export function ReportForm({
             defaultChecked
           />
         )}
-      </fieldset>
+      </FormSection>
 
       {found && (
-        <fieldset className="space-y-5">
-          <legend className="type-section mb-5">Handing it in</legend>
+        <FormSection
+          id="hand-in"
+          title="Handing it in"
+          description="Drop the item at a staffed collection point. Staff record it when they take it."
+        >
           <SelectField
             name="dropOffPointId"
             label="Where will you drop it off?"
@@ -143,12 +160,21 @@ export function ReportForm({
               label: `${point.name} (${point.openingHours})`,
             }))}
           />
-        </fieldset>
+        </FormSection>
       )}
 
-      <div className="space-y-4 border-t border-line pt-6">
-        <FormStatus />
-        <SubmitButton pendingLabel="Publishing report">Publish report</SubmitButton>
+      <div className="grid gap-x-12 border-t border-line pt-6 lg:grid-cols-[17rem_minmax(0,44rem)]">
+        <div className="space-y-4 lg:col-start-2">
+          <FormStatus />
+          <div className="flex flex-col-reverse items-stretch gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <p className="text-caption text-ink-faint">
+              {found
+                ? "Your report is published as soon as you submit it."
+                : "Your report is published as soon as you submit it. Private details stay with the desk."}
+            </p>
+            <SubmitButton pendingLabel="Publishing report">Publish report</SubmitButton>
+          </div>
+        </div>
       </div>
     </ActionForm>
   );

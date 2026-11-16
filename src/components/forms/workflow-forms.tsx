@@ -54,7 +54,7 @@ export function CustodyForm({
         maxLength={40}
       />
       <FormStatus />
-      <SubmitButton pendingLabel="Recording custody">Record custody</SubmitButton>
+      <SubmitButton pendingLabel="Recording custody" className="btn btn-primary w-full">Record custody</SubmitButton>
     </ActionForm>
   );
 }
@@ -73,7 +73,7 @@ export function CloseReportForm({ reportId, byAdmin }: { reportId: string; byAdm
         maxLength={200}
       />
       <FormStatus />
-      <SubmitButton pendingLabel="Closing report" className="btn btn-danger">
+      <SubmitButton pendingLabel="Closing report" className="btn btn-danger w-full">
         Close report
       </SubmitButton>
     </ActionForm>
@@ -84,7 +84,7 @@ export function ResolveLostForm({ reportId }: { reportId: string }) {
   return (
     <ActionForm action={resolveLostReportAction.bind(null, reportId)} className="space-y-3">
       <FormStatus />
-      <SubmitButton pendingLabel="Saving">I have it back</SubmitButton>
+      <SubmitButton pendingLabel="Saving" className="btn btn-primary w-full">I have it back</SubmitButton>
     </ActionForm>
   );
 }
@@ -103,7 +103,7 @@ export function ApproveClaimForm({ claimId }: { claimId: string }) {
         maxLength={500}
       />
       <FormStatus />
-      <SubmitButton pendingLabel="Approving claim">Approve claim</SubmitButton>
+      <SubmitButton pendingLabel="Approving claim" className="btn btn-primary w-full">Approve claim</SubmitButton>
     </ActionForm>
   );
 }
@@ -122,7 +122,7 @@ export function RejectClaimForm({ claimId, revoking }: { claimId: string; revoki
       <FormStatus />
       <SubmitButton
         pendingLabel={revoking ? "Withdrawing approval" : "Saving decision"}
-        className="btn btn-danger"
+        className="btn btn-danger w-full"
       >
         {revoking ? "Withdraw approval" : "Do not approve"}
       </SubmitButton>
@@ -162,7 +162,7 @@ export function ScheduleCollectionForm({
         defaultValue={currentNote ?? undefined}
       />
       <FormStatus />
-      <SubmitButton pendingLabel="Saving collection time">
+      <SubmitButton pendingLabel="Saving collection time" className="btn btn-primary w-full">
         {current ? "Change collection time" : "Schedule collection"}
       </SubmitButton>
     </ActionForm>
@@ -186,7 +186,7 @@ export function HandoverForm({ claimId }: { claimId: string }) {
         maxLength={300}
       />
       <FormStatus />
-      <SubmitButton pendingLabel="Recording handover">Record handover</SubmitButton>
+      <SubmitButton pendingLabel="Recording handover" className="btn btn-primary w-full">Record handover</SubmitButton>
     </ActionForm>
   );
 }
@@ -197,7 +197,7 @@ export function ConfirmReceiptForm({ claimId }: { claimId: string }) {
   return (
     <ActionForm action={confirmReceiptAction.bind(null, claimId)} className="space-y-3">
       <FormStatus />
-      <SubmitButton pendingLabel="Confirming">I have received my item</SubmitButton>
+      <SubmitButton pendingLabel="Confirming" className="btn btn-primary w-full">I have received my item</SubmitButton>
     </ActionForm>
   );
 }
@@ -209,7 +209,7 @@ export function WithdrawClaimForm({ claimId }: { claimId: string }) {
         Withdrawing is final. You will not be able to claim this item again.
       </p>
       <FormStatus />
-      <SubmitButton pendingLabel="Withdrawing claim" className="btn btn-danger">
+      <SubmitButton pendingLabel="Withdrawing claim" className="btn btn-danger w-full">
         Withdraw my claim
       </SubmitButton>
     </ActionForm>

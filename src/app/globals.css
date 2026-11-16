@@ -8,96 +8,114 @@
  * bg-brand-600, text-brand-600 and so on. Change a value here and it changes
  * everywhere.
  *
+ * The look: cool neutral surfaces, hairline borders instead of shadows, one
+ * typeface (Geist) used at a tight scale, and colour reserved for meaning.
+ *
  * Colour roles
- *   paper / surface   warm off-white page and card backgrounds
- *   navy / ink        navigation and text
- *   brand (teal)      primary actions and found items
- *   lost (amber)      lost-item indicators only
- *   returned (green)  successful returns only
- *   danger (red)      errors and destructive actions
+ *   paper / surface / sunken   page canvas, raised surfaces, recessed wells
+ *   line / line-strong         hairline borders; the stronger one for controls
+ *   ink (and navy-*)           text, and the dark end of the neutral scale
+ *   brand (teal)               primary actions, links, found items
+ *   lost (amber)               lost-item indicators only
+ *   returned (green)           successful returns only
+ *   danger (red)               errors and destructive actions
  */
 @theme {
-  --color-paper: #f6f2e9;
-  --color-surface: #fffdf9;
-  --color-sunken: #eee8da;
-  --color-line: #e0d8c8;
-  --color-line-strong: #c4b9a2;
+  --color-paper: #f5f6f7;
+  --color-surface: #ffffff;
+  --color-sunken: #eef0f2;
+  --color-line: #e3e6ea;
+  --color-line-strong: #cbd0d7;
 
-  --color-navy-950: #0a1a30;
-  --color-navy-900: #10233f;
-  --color-navy-800: #1a3355;
-  --color-navy-700: #2b4669;
-  --color-navy-200: #b9c6da;
+  /* The neutral scale. Named "navy" for history: it is a blue-leaning grey. */
+  --color-navy-950: #0b1220;
+  --color-navy-900: #111a2b;
+  --color-navy-800: #1f2a3d;
+  --color-navy-700: #8c95a4;
+  --color-navy-200: #c3c9d2;
 
-  --color-ink: #10233f;
-  --color-ink-soft: #46546d;
-  --color-ink-faint: #5d697f;
+  --color-ink: #111a2b;
+  --color-ink-soft: #4b5567;
+  --color-ink-faint: #5f697c;
 
-  --color-brand-800: #084b4a;
-  --color-brand-700: #0a5f5e;
-  --color-brand-600: #0e7c7b;
-  --color-brand-400: #4fb7b2;
-  --color-brand-100: #d3eae7;
-  --color-brand-50: #e8f4f2;
+  --color-brand-800: #07524d;
+  --color-brand-700: #086660;
+  --color-brand-600: #0a7a72;
+  --color-brand-400: #5bb3aa;
+  --color-brand-100: #d5ecea;
+  --color-brand-50: #edf7f6;
 
-  --color-lost-800: #774700;
-  --color-lost-700: #955b00;
-  --color-lost-400: #e2a32a;
-  --color-lost-100: #f9e8c4;
-  --color-lost-50: #fcf3df;
+  --color-lost-800: #7a4206;
+  --color-lost-700: #9a5708;
+  --color-lost-400: #e2a12b;
+  --color-lost-100: #f8e7c6;
+  --color-lost-50: #fdf6e9;
 
-  --color-returned-800: #175a39;
-  --color-returned-700: #1f7a4d;
-  --color-returned-100: #d7eedf;
-  --color-returned-50: #eaf6ee;
+  --color-returned-800: #15583a;
+  --color-returned-700: #1c7448;
+  --color-returned-100: #d4ecdc;
+  --color-returned-50: #eef8f1;
 
-  --color-danger-800: #86211b;
-  --color-danger-700: #a32a22;
-  --color-danger-100: #f7dcd9;
-  --color-danger-50: #fcefed;
+  --color-danger-800: #8f1d14;
+  --color-danger-700: #b42318;
+  --color-danger-100: #fbdcd8;
+  --color-danger-50: #fef3f2;
 
   /* Typefaces are loaded in src/app/layout.tsx with next/font/local. */
-  --font-display: var(--font-fraunces), var(--font-fraunces-ext), Georgia, "Times New Roman", serif;
-  --font-sans: var(--font-atkinson), var(--font-atkinson-ext), system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-sans: var(--font-geist), ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-display: var(--font-sans);
+  --font-mono: var(--font-geist-mono), ui-monospace, "SFMono-Regular", Menlo, monospace;
 
-  /* Type scale: text-display, text-page, text-section, text-card, ... */
-  --text-display: clamp(2.375rem, 1.6rem + 3.6vw, 3.75rem);
-  --text-display--line-height: 1.02;
-  --text-display--letter-spacing: -0.025em;
-  --text-page: clamp(1.875rem, 1.5rem + 1.6vw, 2.5rem);
-  --text-page--line-height: 1.1;
-  --text-page--letter-spacing: -0.02em;
-  --text-section: 1.5rem;
-  --text-section--line-height: 1.2;
-  --text-section--letter-spacing: -0.012em;
-  --text-card: 1.125rem;
-  --text-card--line-height: 1.3;
-  --text-lead: 1.125rem;
+  /*
+   * Type scale. Steps of roughly 1.2 from a 15px body, headings set tight.
+   * text-display, text-page, text-section, text-card, text-lead ...
+   */
+  --text-display: clamp(2.25rem, 1.55rem + 2.9vw, 3.25rem);
+  --text-display--line-height: 1.04;
+  --text-display--letter-spacing: -0.038em;
+  --text-page: clamp(1.75rem, 1.5rem + 1vw, 2.125rem);
+  --text-page--line-height: 1.12;
+  --text-page--letter-spacing: -0.03em;
+  --text-section: 1.25rem;
+  --text-section--line-height: 1.3;
+  --text-section--letter-spacing: -0.02em;
+  --text-card: 1rem;
+  --text-card--line-height: 1.35;
+  --text-card--letter-spacing: -0.011em;
+  --text-lead: 1.0625rem;
   --text-lead--line-height: 1.6;
-  --text-body: 1rem;
+  --text-body: 0.9375rem;
   --text-body--line-height: 1.6;
-  --text-small: 0.9375rem;
+  --text-small: 0.875rem;
   --text-small--line-height: 1.5;
   --text-caption: 0.8125rem;
   --text-caption--line-height: 1.4;
 
-  /* Modest corners: nothing in the interface is pill-shaped. */
-  --radius-sm: 3px;
-  --radius-md: 5px;
-  --radius-lg: 8px;
+  /* Corners scale with the size of the thing: badges < controls < cards. */
+  --radius-sm: 5px;
+  --radius-md: 7px;
+  --radius-lg: 11px;
 
-  --shadow-tag: 0 1px 0 rgb(16 35 63 / 0.04), 0 8px 20px -12px rgb(16 35 63 / 0.28);
-  --shadow-lift: 0 2px 0 rgb(16 35 63 / 0.05), 0 18px 32px -18px rgb(16 35 63 / 0.4);
+  --shadow-xs: 0 1px 2px rgb(17 26 43 / 0.05);
+  --shadow-tag: 0 1px 2px rgb(17 26 43 / 0.04);
+  --shadow-lift:
+    0 1px 2px rgb(17 26 43 / 0.04), 0 4px 10px -2px rgb(17 26 43 / 0.06),
+    0 14px 32px -12px rgb(17 26 43 / 0.16);
+  --shadow-pop:
+    0 0 0 1px rgb(17 26 43 / 0.06), 0 6px 16px -4px rgb(17 26 43 / 0.12),
+    0 20px 40px -16px rgb(17 26 43 / 0.2);
 
   --ease-out-soft: cubic-bezier(0.22, 1, 0.36, 1);
 
-  --animate-rise: rise 0.35s var(--ease-out-soft) both;
-  --animate-pulse-dot: pulse-dot 1.8s ease-in-out infinite;
+  --animate-rise: rise 0.24s var(--ease-out-soft) both;
+  --animate-page-in: page-in 0.22s var(--ease-out-soft) both;
+  --animate-pulse-dot: pulse-dot 2s ease-in-out infinite;
+  --animate-shimmer: shimmer 1.4s ease-in-out infinite;
 
   @keyframes rise {
     from {
       opacity: 0;
-      transform: translateY(6px);
+      transform: translateY(4px);
     }
     to {
       opacity: 1;
@@ -105,13 +123,33 @@
     }
   }
 
+  @keyframes page-in {
+    from {
+      opacity: 0;
+      transform: translateY(6px);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+
   @keyframes pulse-dot {
     0%,
     100% {
-      box-shadow: 0 0 0 0 rgb(14 124 123 / 0.45);
+      box-shadow: 0 0 0 0 rgb(10 122 114 / 0.35);
     }
     50% {
-      box-shadow: 0 0 0 7px rgb(14 124 123 / 0);
+      box-shadow: 0 0 0 6px rgb(10 122 114 / 0);
+    }
+  }
+
+  @keyframes shimmer {
+    from {
+      background-position: 100% 0;
+    }
+    to {
+      background-position: -100% 0;
     }
   }
 }
@@ -122,7 +160,9 @@
     color: var(--color-ink);
     font-family: var(--font-sans);
     font-size: 100%;
+    font-feature-settings: "ss01" off;
     -webkit-text-size-adjust: 100%;
+    text-rendering: optimizeLegibility;
   }
 
   body {
@@ -130,15 +170,33 @@
     line-height: var(--text-body--line-height);
   }
 
+  /* 16px on phones: keeps text readable and stops iOS zooming into inputs. */
+  @media (max-width: 47.99rem) {
+    body {
+      font-size: 1rem;
+    }
+  }
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    text-wrap: balance;
+  }
+  p {
+    text-wrap: pretty;
+  }
+
   /* One visible focus style for every interactive element. */
   :focus-visible {
-    outline: 3px solid var(--color-brand-600);
+    outline: 2px solid var(--color-brand-600);
     outline-offset: 2px;
     border-radius: var(--radius-sm);
   }
 
   ::selection {
     background: var(--color-brand-100);
+    color: var(--color-ink);
   }
 
   /* People who ask for less motion get none of the decorative kind. */
@@ -155,14 +213,12 @@
 }
 
 @layer components {
-  /* --- Headings: Fraunces, softened, never "wonky" ------------------------ */
+  /* --- Headings ------------------------------------------------------------ */
   .type-display,
   .type-page,
   .type-section,
   .type-card {
     font-family: var(--font-display);
-    font-variation-settings: "SOFT" 60, "WONK" 0;
-    font-optical-sizing: auto;
     color: var(--color-ink);
     text-wrap: balance;
   }
@@ -179,67 +235,111 @@
     @apply text-card font-semibold;
   }
 
-  /* Reference codes such as CT-7KQ2MX: spaced so they are easy to read aloud. */
+  /*
+   * Reference codes such as CT-7KQ2MX and shelf labels. Set in Geist Mono
+   * because people read them aloud at the desk and copy them character by
+   * character; nothing else in the interface uses the mono face.
+   */
   .type-reference {
-    font-variant-numeric: tabular-nums;
-    letter-spacing: 0.08em;
-    font-weight: 700;
+    font-family: var(--font-mono);
+    font-variant-numeric: tabular-nums slashed-zero;
+    letter-spacing: 0.02em;
+    font-weight: 500;
   }
 
   .container-page {
-    @apply mx-auto w-full max-w-6xl px-4 sm:px-6;
+    @apply mx-auto w-full max-w-[76rem] px-4 sm:px-6 lg:px-8;
   }
 
-  /* --- Buttons: rectangles with lightly rounded corners -------------------- */
+  /* A quiet, consistent page header: title, one line of context, actions. */
+  .page-header {
+    @apply border-b border-line bg-surface;
+  }
+
+  /* --- Buttons --------------------------------------------------------------- */
   .btn {
-    @apply inline-flex min-h-11 items-center justify-center gap-2 rounded-md border border-transparent px-4 py-2 text-body font-bold no-underline;
+    @apply relative inline-flex min-h-10 cursor-pointer items-center justify-center gap-2 rounded-md border border-transparent px-4 py-2 text-small font-medium whitespace-nowrap no-underline select-none;
+    letter-spacing: -0.005em;
     transition:
       background-color 0.15s ease,
       border-color 0.15s ease,
       color 0.15s ease,
-      transform 0.1s ease;
+      box-shadow 0.15s ease,
+      transform 0.12s ease;
   }
-  .btn:active {
-    transform: translateY(1px);
+  .btn:active:not([aria-disabled="true"]):not(:disabled) {
+    transform: scale(0.98);
   }
   .btn:disabled,
   .btn[aria-disabled="true"] {
     @apply cursor-not-allowed opacity-55;
   }
   .btn-primary {
-    @apply bg-brand-600 text-white hover:bg-brand-700;
+    @apply bg-brand-600 text-white shadow-xs;
+    box-shadow:
+      inset 0 1px 0 rgb(255 255 255 / 0.12),
+      0 1px 2px rgb(7 82 77 / 0.25);
+  }
+  .btn-primary:hover:not([aria-disabled="true"]) {
+    @apply bg-brand-700;
   }
   .btn-navy {
-    @apply bg-navy-900 text-white hover:bg-navy-800;
+    @apply bg-navy-900 text-white;
+    box-shadow:
+      inset 0 1px 0 rgb(255 255 255 / 0.08),
+      0 1px 2px rgb(11 18 32 / 0.25);
+  }
+  .btn-navy:hover:not([aria-disabled="true"]) {
+    @apply bg-navy-800;
   }
   .btn-secondary {
-    @apply border-line-strong bg-surface text-ink hover:border-navy-700 hover:bg-white;
+    @apply border-line-strong bg-surface text-ink shadow-xs;
+  }
+  .btn-secondary:hover:not([aria-disabled="true"]) {
+    @apply border-navy-700 bg-paper;
   }
   .btn-ghost {
-    @apply text-brand-700 hover:bg-brand-50;
+    @apply text-ink-soft;
+  }
+  .btn-ghost:hover {
+    @apply bg-sunken text-ink;
   }
   .btn-danger {
-    @apply border-danger-700 bg-surface text-danger-700 hover:bg-danger-50;
+    @apply border-line-strong bg-surface text-danger-700 shadow-xs;
   }
+  .btn-danger:hover:not([aria-disabled="true"]) {
+    @apply border-danger-700 bg-danger-50;
+  }
+  /* Kept for compatibility: the header is light now, so this is secondary. */
   .btn-on-navy {
-    @apply border-navy-700 text-white hover:border-navy-200 hover:bg-navy-800;
+    @apply border-line-strong bg-surface text-ink shadow-xs;
+  }
+  .btn-on-navy:hover {
+    @apply border-navy-700 bg-paper;
   }
   .btn-small {
-    @apply min-h-9 px-3 py-1 text-small;
+    @apply min-h-8 gap-1.5 px-3 py-1 text-caption;
+  }
+  /* Full-size touch targets on phones, whatever the button's size. */
+  @media (max-width: 47.99rem) {
+    .btn-small {
+      @apply min-h-10 px-3.5 text-small;
+    }
   }
 
   /* --- Form controls --------------------------------------------------------- */
   .field-label {
-    @apply mb-1.5 block text-body font-bold text-ink;
+    @apply mb-1.5 block text-small font-medium text-ink;
   }
   .field-hint {
-    @apply mb-1.5 block text-small text-ink-soft;
+    @apply -mt-0.5 mb-2 block text-caption text-ink-faint;
   }
   .field-input {
-    @apply block min-h-11 w-full rounded-md border border-line-strong bg-white px-3 py-2 text-body text-ink;
+    @apply block min-h-10 w-full rounded-md border border-line-strong bg-surface px-3 py-2 text-body text-ink shadow-xs;
     transition:
       border-color 0.15s ease,
-      box-shadow 0.15s ease;
+      box-shadow 0.15s ease,
+      background-color 0.15s ease;
   }
   .field-input::placeholder {
     @apply text-ink-faint;
@@ -247,24 +347,58 @@
   .field-input:hover {
     @apply border-navy-700;
   }
+  .field-input:focus,
   .field-input:focus-visible {
     @apply border-brand-600;
-    outline-offset: 0;
+    outline: none;
+    box-shadow: 0 0 0 3px rgb(10 122 114 / 0.16);
   }
   .field-input[aria-invalid="true"] {
-    @apply border-danger-700 bg-danger-50;
+    @apply border-danger-700;
+    box-shadow: 0 0 0 3px rgb(180 35 24 / 0.1);
+  }
+  textarea.field-input {
+    @apply min-h-24 resize-y leading-relaxed;
+  }
+  select.field-input {
+    @apply cursor-pointer appearance-none pr-9;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='none' stroke='%235f697c' stroke-width='1.75' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m4.5 6.5 3.5 3.5 3.5-3.5'/%3E%3C/svg%3E");
+    background-position: right 0.7rem center;
+    background-repeat: no-repeat;
   }
   .field-error {
-    @apply mt-1.5 flex items-start gap-1.5 text-small font-bold text-danger-700;
+    @apply mt-1.5 flex animate-rise items-start gap-1.5 text-caption font-medium text-danger-700;
   }
 
   /* --- Surfaces ---------------------------------------------------------------- */
   .panel {
     @apply rounded-lg border border-line bg-surface;
   }
+  .panel-header {
+    @apply flex items-center justify-between gap-4 border-b border-line px-5 py-3.5;
+  }
 
   .link {
-    @apply font-bold text-brand-700 underline decoration-brand-400 decoration-2 underline-offset-3 hover:text-brand-800 hover:decoration-brand-700;
+    @apply font-medium text-brand-700 underline decoration-brand-400/50 decoration-1 underline-offset-[3px];
+    transition:
+      color 0.15s ease,
+      text-decoration-color 0.15s ease;
+  }
+  .link:hover {
+    @apply text-brand-800 decoration-brand-700;
+  }
+
+  /* Skeleton placeholder used by the loading screens. */
+  .skeleton {
+    @apply rounded-md;
+    background: linear-gradient(
+      90deg,
+      var(--color-sunken) 0%,
+      color-mix(in srgb, var(--color-sunken) 45%, white) 50%,
+      var(--color-sunken) 100%
+    );
+    background-size: 200% 100%;
+    animation: var(--animate-shimmer);
   }
 
   /*
@@ -273,13 +407,31 @@
    * reference code and tears off (visually) along a perforated line.
    */
   .tag-perforation {
-    background-image: linear-gradient(to right, var(--color-line-strong) 55%, transparent 0);
-    background-size: 9px 1.5px;
+    background-image: linear-gradient(to right, var(--color-line-strong) 50%, transparent 0);
+    background-size: 7px 1px;
     background-repeat: repeat-x;
-    height: 1.5px;
+    height: 1px;
   }
   .tag-hole {
-    @apply inline-block size-3.5 shrink-0 rounded-full border border-line-strong bg-paper;
-    box-shadow: inset 0 1px 1.5px rgb(16 35 63 / 0.22);
+    @apply inline-block size-2.5 shrink-0 rounded-full border border-line-strong bg-paper;
+    box-shadow: inset 0 1px 1px rgb(17 26 43 / 0.18);
+  }
+
+  /*
+   * Native <details> that opens and closes smoothly in browsers that can
+   * animate to `height: auto`; elsewhere it simply snaps open.
+   */
+  .disclosure {
+    interpolate-size: allow-keywords;
+  }
+  .disclosure::details-content {
+    block-size: 0;
+    overflow: hidden;
+    transition:
+      block-size 0.24s var(--ease-out-soft),
+      content-visibility 0.24s allow-discrete;
+  }
+  .disclosure[open]::details-content {
+    block-size: auto;
   }
 }

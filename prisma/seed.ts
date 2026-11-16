@@ -42,6 +42,8 @@ async function main() {
   await db.report.deleteMany();
   await db.collectionPoint.deleteMany();
   await db.user.deleteMany();
+  // Sign-in lockouts belong to the old data, so a reset clears them too.
+  await db.rateLimit.deleteMany();
 
   // --- People -------------------------------------------------------------------
   const passwordHash = await bcrypt.hash(DEMO_PASSWORD, 10);

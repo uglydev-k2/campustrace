@@ -101,7 +101,7 @@ function FieldShell({
     <div>
       <label htmlFor={id} className="field-label">
         {label}
-        {optional && <span className="ml-1.5 font-normal text-ink-soft">(optional)</span>}
+        {optional && <span className="ml-1.5 font-normal text-ink-faint">Optional</span>}
       </label>
       {hint && (
         <span id={`${id}-hint`} className="field-hint">
@@ -242,22 +242,22 @@ export function CheckboxField({
   const id = fieldId ?? name;
   return (
     <div>
-      <div className="flex items-start gap-3">
+      <div className="flex items-start gap-3 rounded-lg border border-line bg-paper p-3.5 transition-colors has-checked:border-brand-600/40 has-checked:bg-brand-50/60">
         <input
           id={id}
           name={name}
           type="checkbox"
-          className="mt-1 size-5 shrink-0 rounded-sm accent-brand-600"
+          className="mt-0.5 size-[1.125rem] shrink-0 cursor-pointer rounded-sm accent-brand-600"
           aria-invalid={error ? true : undefined}
           aria-describedby={describedBy(id, hint, error)}
           {...input}
         />
         <div>
-          <label htmlFor={id} className="text-body font-bold text-ink">
+          <label htmlFor={id} className="cursor-pointer text-small font-medium text-ink">
             {label}
           </label>
           {hint && (
-            <p id={`${id}-hint`} className="text-small text-ink-soft">
+            <p id={`${id}-hint`} className="mt-0.5 text-caption text-ink-faint">
               {hint}
             </p>
           )}
@@ -301,7 +301,7 @@ export function FileField({
         multiple={multiple}
         aria-invalid={error ? true : undefined}
         aria-describedby={describedBy(id, hint, error)}
-        className="field-input cursor-pointer p-1.5 file:mr-3 file:cursor-pointer file:rounded-sm file:border-0 file:bg-navy-900 file:px-3 file:py-2 file:text-small file:font-bold file:text-white"
+        className="field-input cursor-pointer border-dashed bg-paper p-1.5 text-small text-ink-soft file:mr-3 file:cursor-pointer file:rounded-[5px] file:border file:border-line-strong file:bg-surface file:px-3 file:py-1.5 file:text-caption file:font-medium file:text-ink file:shadow-xs file:transition-colors hover:file:bg-sunken"
         onChange={(event) => {
           const chosen = Array.from(event.target.files ?? []);
           setFiles(chosen);
@@ -317,20 +317,63 @@ export function FileField({
         <img
           src={previewUrl}
           alt="Preview of the photo you chose"
-          className="mt-3 h-40 w-auto animate-rise rounded-md border border-line object-cover"
+          className="mt-3 h-40 w-auto animate-rise rounded-lg border border-line object-cover shadow-xs"
         />
       )}
       {!preview && files.length > 0 && (
-        <ul className="mt-2 space-y-1 text-small text-ink-soft">
+        <ul className="mt-2 space-y-1">
           {files.map((file) => (
-            <li key={`${file.name}-${file.size}`} className="flex items-center gap-1.5">
-              <Paperclip aria-hidden className="size-3.5" />
-              {file.name}
+            <li
+              key={`${file.name}-${file.size}`}
+              className="flex animate-rise items-center gap-2 rounded-md bg-sunken px-2.5 py-1.5 text-caption text-ink-soft"
+            >
+              <Paperclip aria-hidden className="size-3.5 shrink-0 text-ink-faint" />
+              <span className="truncate">{file.name}</span>
+              <span className="ml-auto shrink-0 text-ink-faint">{formatBytes(file.size)}</span>
             </li>
           ))}
         </ul>
       )}
     </FieldShell>
+  );
+}
+
+function formatBytes(bytes: number): string {
+  if (bytes < 1024 * 1024) return `${Math.max(1, Math.round(bytes / 1024))} KB`;
+  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+}
+
+/**
+ * One section of a long form: what the section is about on the left, its
+ * fields in a panel on the right. Stacks into one column on small screens.
+ * A labelled group (role="group") gives screen readers the same grouping a
+ * <fieldset> would.
+ */
+export function FormSection({
+  id,
+  title,
+  description,
+  children,
+}: {
+  id: string;
+  title: string;
+  description?: React.ReactNode;
+  children: React.ReactNode;
+}) {
+  return (
+    <div
+      role="group"
+      aria-labelledby={`${id}-title`}
+      className="grid gap-x-12 gap-y-4 border-t border-line pt-8 first-of-type:border-t-0 first-of-type:pt-0 lg:grid-cols-[17rem_minmax(0,44rem)]"
+    >
+      <div>
+        <h2 id={`${id}-title`} className="type-card">
+          {title}
+        </h2>
+        {description && <p className="mt-1 text-small text-ink-soft">{description}</p>}
+      </div>
+      <div className="panel space-y-5 p-5 shadow-xs sm:p-6">{children}</div>
+    </div>
   );
 }
 
@@ -351,7 +394,7 @@ export function FormStatus() {
           transition={{ duration: 0.2 }}
           className="overflow-hidden"
         >
-          <span className="flex items-start gap-2 rounded-md border border-danger-700 bg-danger-50 px-3 py-2.5 text-small font-bold text-danger-800">
+          <span className="flex items-start gap-2.5 rounded-lg border border-danger-100 bg-danger-50 px-3.5 py-3 text-small font-medium text-danger-800">
             <CircleAlert aria-hidden className="mt-0.5 size-4 shrink-0" />
             {state.message}
           </span>

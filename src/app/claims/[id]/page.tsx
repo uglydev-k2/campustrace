@@ -13,6 +13,7 @@ import {
 } from "@/components/forms/workflow-forms";
 import { JourneyTrack } from "@/components/journey-track";
 import { Notice } from "@/components/notice";
+import { PageHeader } from "@/components/page-header";
 import { StatusBadge } from "@/components/status-badge";
 import { Timeline } from "@/components/timeline";
 import { requireUser } from "@/lib/auth";
@@ -84,40 +85,53 @@ export default async function ClaimPage({ params, searchParams }: PageProps<"/cl
   const next = nextStepText(claim.status, inCustody, admin);
 
   return (
-    <div className="container-page py-10">
+    <>
+      <PageHeader
+        back={{ href: `/reports/${report.id}`, label: report.title }}
+        title={
+          <>
+            {isClaimant ? "Your claim on" : "Claim on"} {report.title}
+          </>
+        }
+        meta={
+          <>
+            <span className="inline-flex items-center rounded-sm bg-navy-900 px-2 py-0.5 text-caption font-medium text-white">
+              Claim
+            </span>
+            <StatusBadge {...claimStatusLabel(claim.status)} />
+            <span className="type-reference text-caption text-ink-faint">{claim.reference}</span>
+          </>
+        }
+        description={
+          <>
+            Found item{" "}
+            <Link href={`/reports/${report.id}`} className="link">
+              {report.reference}
+            </Link>
+            , submitted {formatDateTime(claim.createdAt)}
+          </>
+        }
+      >
+        {claim.status !== "REJECTED" && claim.status !== "WITHDRAWN" && (
+          <div className="mt-8 rounded-lg border border-line bg-paper p-5 sm:p-6">
+            <JourneyTrack steps={buildJourney(report.status, claim.status)} />
+          </div>
+        )}
+      </PageHeader>
+
+    <div className="container-page pt-8">
       <Notice code={typeof notice === "string" ? notice : undefined} />
 
-      <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
-        <span className="rounded-sm bg-navy-900 px-2 py-0.5 text-small font-bold text-white">Claim</span>
-        <span className="type-reference text-small text-ink-soft">{claim.reference}</span>
-        <StatusBadge {...claimStatusLabel(claim.status)} />
-      </div>
-      <h1 className="type-page mt-3">
-        {isClaimant ? "Your claim on" : "Claim on"} {report.title}
-      </h1>
-      <p className="mt-2 text-ink-soft">
-        Found item{" "}
-        <Link href={`/reports/${report.id}`} className="link">
-          {report.reference}
-        </Link>
-        , submitted {formatDateTime(claim.createdAt)}
-      </p>
-
-      {claim.status !== "REJECTED" && claim.status !== "WITHDRAWN" && (
-        <div className="panel mt-8 p-5 sm:p-6">
-          <JourneyTrack steps={buildJourney(report.status, claim.status)} />
-        </div>
-      )}
-
-      <div className="mt-10 grid gap-10 lg:grid-cols-[1.6fr_1fr]">
-        <div className="space-y-10">
+      <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_22rem] lg:gap-10">
+        <div className="min-w-0 space-y-8">
           {/* ---- What happens next ------------------------------------------- */}
-          <section className="rounded-lg border-l-4 border-brand-600 bg-brand-50 p-5">
+          <section className="relative overflow-hidden rounded-lg border border-brand-100 bg-brand-50/70 p-5 pl-6">
+            <span aria-hidden className="absolute inset-y-0 left-0 w-1 bg-brand-600" />
             <h2 className="type-card">{next.title}</h2>
-            <p className="mt-1.5 text-ink-soft">{next.body}</p>
+            <p className="mt-1 text-small text-ink-soft">{next.body}</p>
             {claim.reviewNote && (
-              <p className="mt-3 border-t border-brand-100 pt-3">
-                <span className="font-bold">Note from the desk: </span>
+              <p className="mt-3 border-t border-brand-100 pt-3 text-small">
+                <span className="font-semibold">Note from the desk: </span>
                 {claim.reviewNote}
               </p>
             )}
@@ -125,28 +139,28 @@ export default async function ClaimPage({ params, searchParams }: PageProps<"/cl
 
           {/* ---- Collection details ------------------------------------------ */}
           {claim.collectionAt && point && claim.status === "COLLECTION_SCHEDULED" && (
-            <section>
-              <h2 className="type-section">Collection</h2>
-              <dl className="panel mt-4 grid gap-5 p-5 sm:grid-cols-2">
+            <section className="panel">
+              <h2 className="panel-header type-card">Collection</h2>
+              <dl className="grid gap-5 p-5 sm:grid-cols-2">
                 <div className="flex gap-3">
-                  <CalendarClock aria-hidden className="mt-1 size-5 shrink-0 text-brand-700" />
+                  <CalendarClock aria-hidden className="mt-0.5 size-4 shrink-0 text-brand-700" />
                   <div>
-                    <dt className="text-small font-bold text-ink-soft">When</dt>
-                    <dd className="font-bold">{formatDateTime(claim.collectionAt)}</dd>
+                    <dt className="text-caption font-medium text-ink-faint">When</dt>
+                    <dd className="font-semibold">{formatDateTime(claim.collectionAt)}</dd>
                   </div>
                 </div>
                 <div className="flex gap-3">
-                  <MapPin aria-hidden className="mt-1 size-5 shrink-0 text-brand-700" />
+                  <MapPin aria-hidden className="mt-0.5 size-4 shrink-0 text-brand-700" />
                   <div>
-                    <dt className="text-small font-bold text-ink-soft">Where</dt>
-                    <dd className="font-bold">{point.name}</dd>
+                    <dt className="text-caption font-medium text-ink-faint">Where</dt>
+                    <dd className="font-semibold">{point.name}</dd>
                     <dd className="text-small text-ink-soft">
                       {point.location}. Open {point.openingHours}.
                     </dd>
                   </div>
                 </div>
                 <div className="sm:col-span-2">
-                  <dt className="text-small font-bold text-ink-soft">Bring</dt>
+                  <dt className="text-caption font-medium text-ink-faint">Bring</dt>
                   <dd>
                     Your student ID, and this reference:{" "}
                     <span className="type-reference">{claim.reference}</span>
@@ -160,7 +174,7 @@ export default async function ClaimPage({ params, searchParams }: PageProps<"/cl
           {/* ---- The evidence ------------------------------------------------- */}
           <section>
             <h2 className="type-section flex items-center gap-2">
-              <Lock aria-hidden className="size-5 text-ink-soft" />
+              <Lock aria-hidden className="size-4 text-ink-faint" />
               {isClaimant ? "What you told the desk" : "The claimant's evidence"}
             </h2>
             <p className="mt-1 text-small text-ink-soft">
@@ -168,33 +182,33 @@ export default async function ClaimPage({ params, searchParams }: PageProps<"/cl
             </p>
 
             {admin && (
-              <dl className="mt-4 grid gap-x-8 gap-y-2 sm:grid-cols-3">
+              <dl className="panel mt-4 grid divide-y divide-line sm:grid-cols-3 sm:divide-x sm:divide-y-0 [&>div]:px-4 [&>div]:py-3 [&_dd]:text-small [&_dd]:font-medium">
                 <div>
-                  <dt className="text-small font-bold text-ink-soft">Claimant</dt>
+                  <dt className="text-caption font-medium text-ink-faint">Claimant</dt>
                   <dd>{claim.claimant.name}</dd>
                 </div>
                 <div>
-                  <dt className="text-small font-bold text-ink-soft">Email</dt>
+                  <dt className="text-caption font-medium text-ink-faint">Email</dt>
                   <dd className="break-all">{claim.claimant.email}</dd>
                 </div>
                 <div>
-                  <dt className="text-small font-bold text-ink-soft">Student number</dt>
+                  <dt className="text-caption font-medium text-ink-faint">Student number</dt>
                   <dd>{claim.claimant.studentNumber ?? "Not given"}</dd>
                 </div>
               </dl>
             )}
 
             <div className={`mt-4 grid gap-4 ${admin ? "md:grid-cols-2" : ""}`}>
-              <div className="panel p-5">
-                <h3 className="text-small font-bold text-ink-soft">
+              <div className="panel p-5 shadow-xs">
+                <h3 className="text-caption font-medium text-ink-faint">
                   {isClaimant ? "Your description" : "Claimant's description"}
                 </h3>
                 <p className="mt-2 whitespace-pre-line">{claim.statement}</p>
               </div>
               {/* The desk verifies by comparing the two accounts side by side. */}
               {admin && (
-                <div className="rounded-lg border border-line-strong bg-sunken p-5">
-                  <h3 className="text-small font-bold text-ink-soft">Finder&apos;s private notes</h3>
+                <div className="rounded-lg border border-dashed border-line-strong bg-sunken/60 p-5">
+                  <h3 className="text-caption font-medium text-ink-faint">Finder&apos;s private notes</h3>
                   <p className="mt-2 whitespace-pre-line">
                     {report.privateDetails ?? "The finder did not record any private details."}
                   </p>
@@ -223,7 +237,7 @@ export default async function ClaimPage({ params, searchParams }: PageProps<"/cl
                         <img
                           src={`/api/files/${file.id}`}
                           alt={`Evidence: ${file.originalName}`}
-                          className="size-28 rounded-md border border-line object-cover"
+                          className="size-28 rounded-lg border border-line object-cover shadow-xs transition-[box-shadow,border-color] duration-200 hover:border-line-strong hover:shadow-lift"
                         />
                       </a>
                     </li>
@@ -231,7 +245,7 @@ export default async function ClaimPage({ params, searchParams }: PageProps<"/cl
                     <li key={file.id}>
                       <a
                         href={`/api/files/${file.id}`}
-                        className="flex size-28 flex-col items-center justify-center gap-2 rounded-md border border-line bg-surface p-2 text-center text-caption font-bold text-brand-700 hover:border-navy-700"
+                        className="flex size-28 flex-col items-center justify-center gap-2 rounded-lg border border-line bg-surface p-2 text-center text-caption font-medium text-ink-soft shadow-xs transition-[box-shadow,border-color,color] duration-200 hover:border-line-strong hover:text-ink hover:shadow-lift"
                       >
                         <FileText aria-hidden className="size-7" />
                         <span className="line-clamp-2 break-all">{file.originalName}</span>
@@ -243,9 +257,9 @@ export default async function ClaimPage({ params, searchParams }: PageProps<"/cl
             )}
           </section>
 
-          <section>
-            <h2 className="type-section">History</h2>
-            <div className="mt-4">
+          <section className="panel">
+            <h2 className="panel-header type-card">History</h2>
+            <div className="p-5">
               <Timeline events={events} />
             </div>
           </section>
@@ -253,11 +267,11 @@ export default async function ClaimPage({ params, searchParams }: PageProps<"/cl
 
         {/* ---- Actions ---------------------------------------------------------- */}
         {/* On small screens the actions come first: they are why the reader is here. */}
-        <aside className="order-first space-y-5 empty:hidden lg:order-none">
+        <aside className="order-first space-y-4 empty:hidden lg:sticky lg:top-20 lg:order-none lg:self-start">
           {may.confirm.ok && (
-            <div className="panel border-returned-700 p-5">
+            <div className="panel border-returned-700/40 p-5 ring-3 ring-returned-50">
               <h2 className="type-card">Do you have your item?</h2>
-              <p className="mt-2 mb-4 text-ink-soft">
+              <p className="mt-1.5 mb-4 text-small text-ink-soft">
                 The desk recorded handing it to you
                 {claim.handedOverAt && ` on ${formatDateTime(claim.handedOverAt)}`}. Confirming
                 closes the return.
@@ -267,9 +281,10 @@ export default async function ClaimPage({ params, searchParams }: PageProps<"/cl
           )}
 
           {admin && may.approve.ok && (
-            <div className="panel border-navy-700 p-5">
-              <h2 className="type-card">Desk: review this claim</h2>
-              <p className="mt-2 mb-4 text-ink-soft">
+            <div className="panel p-5">
+              <DeskLabel />
+              <h2 className="type-card">Review this claim</h2>
+              <p className="mt-1.5 mb-4 text-small text-ink-soft">
                 Approve only if the claimant&apos;s description matches the finder&apos;s private
                 notes or the item itself.
                 {!inCustody && " You can decide now, before the item arrives."}
@@ -284,21 +299,22 @@ export default async function ClaimPage({ params, searchParams }: PageProps<"/cl
           )}
 
           {admin && claim.status === "SUBMITTED" && !may.approve.ok && (
-            <div className="panel border-navy-700 p-5">
-              <h2 className="type-card">Desk: review this claim</h2>
-              <p className="mt-2 mb-4 text-ink-soft">{may.approve.reason}</p>
+            <div className="panel p-5">
+              <DeskLabel />
+              <h2 className="type-card">Review this claim</h2>
+              <p className="mt-1.5 mb-4 text-small text-ink-soft">{may.approve.reason}</p>
               <RejectClaimForm claimId={id} revoking={false} />
             </div>
           )}
 
           {/* The custody gate, made visible. */}
           {admin && awaitingItem && (
-            <div className="rounded-lg border border-lost-700 bg-lost-50 p-5" data-testid="custody-gate">
+            <div className="rounded-lg border border-lost-100 bg-lost-50 p-5" data-testid="custody-gate">
               <h2 className="type-card flex items-start gap-2">
-                <TriangleAlert aria-hidden className="mt-0.5 size-5 shrink-0 text-lost-700" />
+                <TriangleAlert aria-hidden className="mt-0.5 size-4 shrink-0 text-lost-700" />
                 Collection is blocked
               </h2>
-              <p className="mt-2 text-ink-soft">
+              <p className="mt-1.5 text-small text-ink-soft">
                 The claim is approved, but custody has not been confirmed. Once the finder hands
                 the item in, record custody on the report and scheduling opens here.
               </p>
@@ -309,11 +325,12 @@ export default async function ClaimPage({ params, searchParams }: PageProps<"/cl
           )}
 
           {admin && may.schedule.ok && (
-            <div className="panel border-navy-700 p-5">
+            <div className="panel p-5">
+              <DeskLabel />
               <h2 className="type-card">
-                Desk: {claim.collectionAt ? "change the collection time" : "schedule collection"}
+                {claim.collectionAt ? "Change the collection time" : "Schedule collection"}
               </h2>
-              <p className="mt-2 mb-4 text-ink-soft">
+              <p className="mt-1.5 mb-4 text-small text-ink-soft">
                 The item is at {point?.name}, shelf{" "}
                 <span className="type-reference text-ink">{report.custodyTag}</span>.
               </p>
@@ -327,9 +344,10 @@ export default async function ClaimPage({ params, searchParams }: PageProps<"/cl
           )}
 
           {admin && may.handover.ok && (
-            <div className="panel border-navy-700 p-5">
-              <h2 className="type-card">Desk: record the handover</h2>
-              <p className="mt-2 mb-4 text-ink-soft">
+            <div className="panel p-5">
+              <DeskLabel />
+              <h2 className="type-card">Record the handover</h2>
+              <p className="mt-1.5 mb-4 text-small text-ink-soft">
                 Do this at the desk, when the owner is in front of you with their student ID.
               </p>
               <HandoverForm claimId={id} />
@@ -353,9 +371,9 @@ export default async function ClaimPage({ params, searchParams }: PageProps<"/cl
           )}
 
           {claim.status === "COMPLETED" && (
-            <div className="rounded-lg border border-returned-700 bg-returned-50 p-5">
+            <div className="rounded-lg border border-returned-100 bg-returned-50 p-5">
               <h2 className="type-card">Return complete</h2>
-              <p className="mt-2 text-ink-soft">
+              <p className="mt-1.5 text-small text-ink-soft">
                 Receipt confirmed
                 {claim.receiptConfirmedAt && ` on ${formatDateTime(claim.receiptConfirmedAt)}`}.
               </p>
@@ -364,6 +382,16 @@ export default async function ClaimPage({ params, searchParams }: PageProps<"/cl
         </aside>
       </div>
     </div>
+    </>
+  );
+}
+
+/** Marks a panel as a desk-only tool, so staff can tell it from the student view. */
+function DeskLabel() {
+  return (
+    <p className="mb-2 inline-flex items-center rounded-sm bg-navy-900 px-1.5 py-0.5 text-[0.6875rem] font-medium text-white">
+      Desk only
+    </p>
   );
 }
 

@@ -36,7 +36,7 @@ const line = {
 type StopState = "numbered" | "done" | "current" | "upcoming";
 
 const MARKER: Record<StopState, string> = {
-  numbered: "border-navy-900 bg-navy-900 text-white",
+  numbered: "border-line-strong bg-surface text-ink",
   done: "border-returned-700 bg-returned-700 text-white",
   current: "border-brand-600 bg-surface text-brand-700 animate-pulse-dot",
   upcoming: "border-line-strong bg-surface text-ink-faint",
@@ -60,7 +60,7 @@ export function JourneyTrack({
   const currentIndex = mode === "progress" ? steps.findIndex((step) => !step.done) : -1;
 
   return (
-    // A container query (@3xl) switches to the horizontal track when the
+    // A container query (@2xl) switches to the horizontal track when the
     // track's own box is wide enough, whatever the screen size.
     <div className="@container">
     <motion.ol
@@ -69,7 +69,7 @@ export function JourneyTrack({
       initial={reduceMotion ? "show" : "hidden"}
       whileInView="show"
       viewport={{ once: true, amount: 0.3 }}
-      className="grid @3xl:grid-cols-6"
+      className="grid @2xl:grid-cols-6"
     >
       {steps.map((step, index) => {
         const state: StopState =
@@ -89,18 +89,18 @@ export function JourneyTrack({
             key={step.key}
             variants={stop}
             aria-current={state === "current" ? "step" : undefined}
-            className="relative flex gap-4 pb-7 last:pb-0 @3xl:block @3xl:pr-5 @3xl:pb-0"
+            className="relative flex gap-3.5 pb-6 last:pb-0 @2xl:block @2xl:pr-6 @2xl:pb-0"
           >
             {next && (
               <span
                 aria-hidden
-                className="absolute top-9 bottom-0 left-[17px] w-0.5 bg-line-strong @3xl:top-[17px] @3xl:right-0 @3xl:bottom-auto @3xl:left-9 @3xl:h-0.5 @3xl:w-auto"
+                className="absolute top-8 bottom-1 left-[13.5px] w-px bg-line-strong @2xl:top-[14px] @2xl:right-1.5 @2xl:bottom-auto @2xl:left-9 @2xl:h-px @2xl:w-auto"
               >
                 {segmentDone && (
                   <motion.span
                     variants={line}
-                    className={`absolute inset-0 origin-top scale-y-(--draw) @3xl:origin-left @3xl:scale-x-(--draw) @3xl:scale-y-100 ${
-                      mode === "explain" ? "bg-navy-900" : "bg-returned-700"
+                    className={`absolute inset-0 origin-top scale-y-(--draw) @2xl:origin-left @2xl:scale-x-(--draw) @2xl:scale-y-100 ${
+                      mode === "explain" ? "bg-navy-700" : "bg-returned-700"
                     }`}
                   />
                 )}
@@ -108,17 +108,17 @@ export function JourneyTrack({
             )}
 
             <span
-              className={`relative z-10 grid size-9 shrink-0 place-items-center rounded-full border-2 text-small font-bold ${MARKER[state]}`}
+              className={`type-reference relative z-10 grid size-7 shrink-0 place-items-center rounded-full border text-caption ${MARKER[state]}`}
             >
-              {state === "done" ? <Check aria-hidden className="size-4.5" strokeWidth={3} /> : index + 1}
+              {state === "done" ? <Check aria-hidden className="size-3.5" strokeWidth={3} /> : index + 1}
             </span>
 
-            <div className="@3xl:mt-3">
-              <p className={`font-bold ${state === "upcoming" ? "text-ink-soft" : "text-ink"}`}>
+            <div className="pt-0.5 @2xl:mt-3 @2xl:pt-0">
+              <p className={`text-small font-medium ${state === "upcoming" ? "text-ink-faint" : "text-ink"}`}>
                 <span className="sr-only">{STATE_TEXT[state]}</span>
                 {step.label}
               </p>
-              <p className="text-small text-ink-soft">{step.hint}</p>
+              <p className="mt-0.5 text-caption text-ink-soft">{step.hint}</p>
             </div>
           </motion.li>
         );

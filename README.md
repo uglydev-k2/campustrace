@@ -43,7 +43,7 @@ handed over.
 | Validation | Zod, on the server, for every form and action |
 | Icons | Lucide |
 | Motion | CSS transitions/keyframes + [Motion for React](https://motion.dev) (`motion/react`) |
-| Fonts | Fraunces (headings) and Atkinson Hyperlegible Next (body), served locally through `next/font/local` |
+| Fonts | Geist (interface) and Geist Mono (reference codes only), served locally through `next/font/local` |
 | Tests | Vitest (business rules) and Playwright (end-to-end journey) |
 
 ## Setup on macOS

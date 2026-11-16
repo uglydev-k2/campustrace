@@ -11,7 +11,7 @@ import { AnimatePresence, motion } from "motion/react";
  */
 export function ResultsGrid({ items }: { items: { id: string; node: React.ReactNode }[] }) {
   return (
-    <ul className="mt-4 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+    <ul className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
       <AnimatePresence mode="popLayout" initial={false}>
         {items.map((item) => (
           <motion.li

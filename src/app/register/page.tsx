@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { AuthShell } from "@/components/auth-shell";
 import { redirect } from "next/navigation";
 import { RegisterForm } from "@/components/forms/register-form";
 import { getCurrentUser, safeNextPath } from "@/lib/auth";
@@ -18,22 +19,19 @@ export default async function RegisterPage({ searchParams }: PageProps<"/registe
     .filter(Boolean);
 
   return (
-    <div className="container-page py-12">
-      <div className="mx-auto max-w-md">
-        <h1 className="type-page">Create an account</h1>
-        <p className="mt-2 text-ink-soft">
-          An account lets the desk reach you about items you report or claim.
-        </p>
-        <div className="panel mt-8 p-5 sm:p-6">
-          <RegisterForm next={next} emailDomains={domains} />
-        </div>
-        <p className="mt-6 text-ink-soft">
-          Already have an account?{" "}
-          <Link href={`/login?next=${encodeURIComponent(next)}`} className="link">
-            Sign in
-          </Link>
-        </p>
-      </div>
-    </div>
+    <AuthShell
+      title="Create an account"
+      description="An account lets the desk reach you about items you report or claim."
+      footer={
+        <>
+        Already have an account?{" "}
+        <Link href={`/login?next=${encodeURIComponent(next)}`} className="link">
+        Sign in
+        </Link>
+        </>
+      }
+    >
+      <RegisterForm next={next} emailDomains={domains} />
+    </AuthShell>
   );
 }

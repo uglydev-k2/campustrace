@@ -42,7 +42,7 @@ export function LoginForm({ next }: { next: string }) {
   }
 
   return (
-    <form onSubmit={onSubmit} className="space-y-5" noValidate>
+    <form onSubmit={onSubmit} className="space-y-4" noValidate>
       <div>
         <label htmlFor="email" className="field-label">
           University email
@@ -77,7 +77,7 @@ export function LoginForm({ next }: { next: string }) {
         <p
           id="login-error"
           role="alert"
-          className="flex animate-rise items-start gap-2 rounded-md border border-danger-700 bg-danger-50 px-3 py-2.5 text-small font-bold text-danger-800"
+          className="flex animate-rise items-start gap-2.5 rounded-lg border border-danger-100 bg-danger-50 px-3.5 py-3 text-small font-medium text-danger-800"
         >
           <CircleAlert aria-hidden className="mt-0.5 size-4 shrink-0" />
           {error}

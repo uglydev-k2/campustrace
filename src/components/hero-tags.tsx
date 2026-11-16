@@ -10,9 +10,9 @@ import { motion, type Variants } from "motion/react";
 
 // Each tag settles at a slightly different angle and offset.
 const REST = [
-  { rotate: -2, className: "lg:mr-10" },
-  { rotate: 1.5, className: "lg:ml-10" },
-  { rotate: -1, className: "lg:mx-5" },
+  { rotate: -1.25, className: "lg:mr-12" },
+  { rotate: 1, className: "lg:ml-12" },
+  { rotate: -0.5, className: "lg:mx-6" },
 ];
 
 const deck: Variants = {
@@ -22,7 +22,7 @@ const deck: Variants = {
 
 export function HeroTags({ tags }: { tags: { id: string; node: React.ReactNode }[] }) {
   return (
-    <motion.ul variants={deck} initial="hidden" animate="show" className="flex flex-col gap-4">
+    <motion.ul variants={deck} initial="hidden" animate="show" className="flex flex-col gap-3">
       {tags.map((tag, index) => {
         const rest = REST[index % REST.length];
         return (
@@ -30,13 +30,13 @@ export function HeroTags({ tags }: { tags: { id: string; node: React.ReactNode }
             key={tag.id}
             className={rest.className}
             variants={{
-              hidden: { opacity: 0, x: 48, y: -12, rotate: rest.rotate + 6 },
+              hidden: { opacity: 0, x: 32, y: -8, rotate: rest.rotate + 4 },
               show: {
                 opacity: 1,
                 x: 0,
                 y: 0,
                 rotate: rest.rotate,
-                transition: { type: "spring", stiffness: 140, damping: 17 },
+                transition: { type: "spring", stiffness: 170, damping: 20 },
               },
             }}
             // Straightens under the pointer so it is easy to read and click.

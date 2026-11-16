@@ -119,18 +119,48 @@ returning it from `createStorage()`; see `docs/deployment.md`.
 
 ## Design system
 
-Tokens are CSS variables in `src/app/globals.css` and exposed to Tailwind
-through `@theme`: warm off-white surfaces, deep navy for navigation and
-headings, teal as the primary action colour, amber reserved for lost-item
-indicators, green reserved for completed returns. The type scale
-(`type-page`, `type-section`, `type-card`, `text-lead`, `text-small`,
-`type-reference`) pairs Fraunces headings with Atkinson Hyperlegible body
-text, both served from `src/fonts` with `next/font/local`.
+Tokens are CSS variables in `src/app/globals.css`, exposed to Tailwind
+through `@theme`. The look is quiet on purpose: cool neutral surfaces,
+hairline borders rather than shadows, and colour kept for meaning. Teal is
+the action colour and marks found items, amber marks lost items, green is
+used only for completed returns, red only for errors. Every text pairing
+meets WCAG AA contrast.
 
-Motion is deliberately light: CSS keyframes for small entrances and status
-pulses, and Motion for React for the orchestrated parts (the staggered hero
-cards and the journey track that draws itself in). `useReducedMotion` turns
-the orchestration off for people who have asked their OS for less movement.
+One typeface, Geist, carries the interface at a tight scale (`type-display`,
+`type-page`, `type-section`, `type-card`, `text-lead`, `text-small`,
+`text-caption`). Geist Mono appears in one place: reference codes such as
+`CT-7KQ2MX` and shelf labels (`type-reference`), because people read them
+aloud and copy them character by character at the desk. Both fonts are
+served from `src/fonts`.
+
+The memorable element is the item tag (`src/components/item-tag.tsx`):
+each report is drawn as a property tag with a punched hole, a perforated
+stub and its reference code, teal for found and amber for lost. The rest of
+the interface stays plain around it.
+
+Shared building blocks:
+
+| Component | Used for |
+| --- | --- |
+| `PageHeader`, `EmptyState` | Every inner page's title band; empty lists |
+| `FormSection` + the field kit in `forms/form.tsx` | Long forms as labelled sections; labels, hints, inline errors |
+| `StatusBadge`, `Timeline`, `JourneyTrack` | Status words, workflow history, the six-stop journey |
+| `UserMenu`, `MobileNav`, `NavLink` | Account menu, phone menu, header links with the active indicator |
+| `Disclosure` | Rarely used or destructive actions, kept folded away |
+
+Motion is short (150 to 300 ms) and mostly answers something the user did:
+the header's active-page bar slides between links, menus fade and scale in,
+filtered search results move to their new places, disclosures slide open,
+and each page fades in on navigation (`src/app/template.tsx`). The one
+unprompted moment is the newest reports settling onto the home page.
+`MotionConfig reducedMotion="user"` and a global CSS rule switch all of it
+off for people who ask their system for less motion.
+
+The browse page has a loading skeleton (`src/app/browse/loading.tsx`).
+Pages behind a permission check deliberately do not: a loading screen
+makes Next.js send `200 OK` before the page has decided whether the
+visitor may see it, which would turn a 404 or a sign-in redirect into a
+200. See `src/components/skeletons.tsx`.
 
 ## Testing
 

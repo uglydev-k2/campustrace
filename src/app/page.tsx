@@ -1,4 +1,4 @@
-import { Lock, Search, ShieldCheck } from "lucide-react";
+import { ChevronRight, Lock, Search, ShieldCheck } from "lucide-react";
 import Link from "next/link";
 import { HeroTags } from "@/components/hero-tags";
 import { ItemTag } from "@/components/item-tag";
@@ -28,39 +28,38 @@ export default async function HomePage() {
 
   return (
     <>
-      <section className="overflow-x-clip border-b border-line">
-        <div className="container-page grid gap-12 py-12 lg:grid-cols-[1.15fr_1fr] lg:items-center lg:gap-16 lg:py-20">
-          <div>
+      <section className="overflow-x-clip border-b border-line bg-surface">
+        <div className="container-page grid grid-cols-1 gap-12 pt-12 pb-14 lg:grid-cols-[1.1fr_1fr] lg:items-center lg:gap-20 lg:pt-20 lg:pb-24">
+          <div className="max-w-xl">
             <h1 className="type-display">Lost it on campus? It may already be waiting for you.</h1>
-            <p className="mt-5 max-w-xl text-lead text-ink-soft">
+            <p className="mt-5 text-lead text-ink-soft">
               CampusTrace is where {CAMPUS_NAME} students hand in what they find and trace what
               they have lost. Every return goes through a staffed collection point, so items reach
               the person who can prove they own them.
             </p>
 
-            <form action="/browse" role="search" className="mt-8 flex max-w-xl flex-col gap-2 sm:flex-row">
+            <form
+              action="/browse"
+              role="search"
+              className="mt-8 flex items-center gap-1.5 rounded-lg border border-line-strong bg-surface p-1.5 shadow-xs transition-[border-color,box-shadow] focus-within:border-brand-600 focus-within:shadow-[0_0_0_3px_rgb(10_122_114/0.16)] hover:border-navy-700"
+            >
               <label htmlFor="hero-search" className="sr-only">
                 Search found and lost items
               </label>
-              <div className="relative flex-1">
-                <Search
-                  aria-hidden
-                  className="pointer-events-none absolute top-1/2 left-3 size-5 -translate-y-1/2 text-ink-faint"
-                />
-                <input
-                  id="hero-search"
-                  name="q"
-                  type="search"
-                  placeholder="Try “keys” or “Science Market”"
-                  className="field-input pl-10"
-                />
-              </div>
-              <button type="submit" className="btn btn-navy">
+              <Search aria-hidden className="ml-2 size-[1.125rem] shrink-0 text-ink-faint" />
+              <input
+                id="hero-search"
+                name="q"
+                type="search"
+                placeholder="Try “keys” or “Science Market”"
+                className="min-w-0 flex-1 bg-transparent px-1.5 py-2 text-body text-ink outline-none placeholder:text-ink-faint"
+              />
+              <button type="submit" className="btn btn-navy shrink-0">
                 Search items
               </button>
             </form>
 
-            <div className="mt-6 flex flex-wrap gap-3">
+            <div className="mt-4 grid grid-cols-2 gap-2 sm:flex sm:flex-wrap">
               <Link href="/report/found" className="btn btn-primary">
                 I found something
               </Link>
@@ -71,65 +70,60 @@ export default async function HomePage() {
           </div>
 
           {heroCards.length > 0 && (
-            <div className="mx-auto w-full max-w-md lg:max-w-none">
-              <h2 className="sr-only">Newest reports</h2>
-              <HeroTags
-                tags={heroCards.map((card) => ({
-                  id: card.id,
-                  node: <ItemTag card={card} headingLevel="h3" />,
-                }))}
+            <div className="relative mx-auto w-full max-w-md lg:max-w-none">
+              <div
+                aria-hidden
+                className="absolute -inset-x-2 -inset-y-5 -z-0 rounded-[18px] border border-line bg-paper sm:-inset-x-6 sm:-inset-y-8 lg:-inset-x-10"
               />
+              <h2 className="sr-only">Newest reports</h2>
+              <div className="relative">
+                <HeroTags
+                  tags={heroCards.map((card) => ({
+                    id: card.id,
+                    node: <ItemTag card={card} headingLevel="h3" />,
+                  }))}
+                />
+              </div>
             </div>
           )}
         </div>
       </section>
 
-      <section id="how-it-works" className="scroll-mt-20 border-b border-line bg-surface">
-        <div className="container-page py-14 lg:py-16">
-          <div className="max-w-2xl">
-            <h2 className="type-page">How a return works</h2>
-            <p className="mt-3 text-lead text-ink-soft">
-              Six steps take an item from the person who found it to the person who owns it.
-              {returnedCount > 0 &&
-                ` ${returnedCount} ${returnedCount === 1 ? "item has" : "items have"} made the trip so far.`}
-            </p>
+      <section id="how-it-works" className="scroll-mt-20">
+        <div className="container-page py-16 lg:py-20">
+          <div className="grid gap-6 lg:grid-cols-[1fr_2fr] lg:gap-16">
+            <div>
+              <h2 className="type-page">How a return works</h2>
+              <p className="mt-3 text-ink-soft">
+                Six steps take an item from the person who found it to the person who owns it.
+                {returnedCount > 0 &&
+                  ` ${returnedCount} ${returnedCount === 1 ? "item has" : "items have"} made the trip so far.`}
+              </p>
+            </div>
+            <div className="grid gap-4 sm:grid-cols-2">
+              <Principle icon={<ShieldCheck aria-hidden className="size-4" />} title="Custody comes before collection">
+                You can claim an item as soon as it is reported, and the desk can review your
+                evidence straight away. A collection time is only set once the desk is holding the
+                item, so you never travel for something that is not there.
+              </Principle>
+              <Principle icon={<Lock aria-hidden className="size-4" />} title="Your proof stays private">
+                Finders keep identifying details out of the public report. Owners describe those
+                details in a claim that only desk staff can read. The finder never sees who claimed
+                an item or what they wrote.
+              </Principle>
+            </div>
           </div>
 
-          <div className="mt-10">
+          <div className="panel mt-10 p-5 sm:p-7">
             <JourneyTrack steps={journey} mode="explain" />
-          </div>
-
-          <div className="mt-12 grid gap-8 border-t border-line pt-8 md:grid-cols-2">
-            <div className="flex gap-4">
-              <ShieldCheck aria-hidden className="mt-1 size-6 shrink-0 text-brand-700" />
-              <div>
-                <h3 className="type-card">Custody comes before collection</h3>
-                <p className="mt-1 text-ink-soft">
-                  You can claim an item as soon as it is reported, and the desk can review your
-                  evidence straight away. A collection time is only set once the desk is holding
-                  the item, so you never travel for something that is not there.
-                </p>
-              </div>
-            </div>
-            <div className="flex gap-4">
-              <Lock aria-hidden className="mt-1 size-6 shrink-0 text-brand-700" />
-              <div>
-                <h3 className="type-card">Your proof stays private</h3>
-                <p className="mt-1 text-ink-soft">
-                  Finders keep identifying details out of the public report. Owners describe those
-                  details in a claim that only desk staff can read. The finder never sees who
-                  claimed an item or what they wrote.
-                </p>
-              </div>
-            </div>
           </div>
         </div>
       </section>
 
-      <section className="container-page pt-14">
+      <section className="container-page">
         <SectionHeading title="Recently found" href="/browse?kind=FOUND" linkLabel="See all found items" />
         {moreFound.length > 0 ? (
-          <ul className="mt-6 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+          <ul className="mt-5 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {moreFound.map((card) => (
               <li key={card.id}>
                 <ItemTag card={card} />
@@ -137,20 +131,20 @@ export default async function HomePage() {
             ))}
           </ul>
         ) : (
-          <p className="mt-4 text-ink-soft">
+          <EmptyRow>
             No other found items are waiting right now.{" "}
             <Link href="/report/found" className="link">
               Report one you have found
             </Link>
             .
-          </p>
+          </EmptyRow>
         )}
       </section>
 
       <section className="container-page pt-14">
         <SectionHeading title="Students are looking for" href="/browse?kind=LOST" linkLabel="See all lost items" />
         {moreLost.length > 0 ? (
-          <ul className="mt-6 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+          <ul className="mt-5 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {moreLost.map((card) => (
               <li key={card.id}>
                 <ItemTag card={card} />
@@ -158,25 +152,62 @@ export default async function HomePage() {
             ))}
           </ul>
         ) : (
-          <p className="mt-4 text-ink-soft">
+          <EmptyRow>
             Nobody else is looking for anything right now.{" "}
             <Link href="/report/lost" className="link">
               Report something you have lost
             </Link>
             .
-          </p>
+          </EmptyRow>
         )}
       </section>
     </>
   );
 }
 
+function Principle({
+  icon,
+  title,
+  children,
+}: {
+  icon: React.ReactNode;
+  title: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <div className="flex gap-3.5">
+      <span className="grid size-8 shrink-0 place-items-center rounded-md border border-line bg-surface text-brand-700 shadow-xs">
+        {icon}
+      </span>
+      <div>
+        <h3 className="type-card">{title}</h3>
+        <p className="mt-1 text-small text-ink-soft">{children}</p>
+      </div>
+    </div>
+  );
+}
+
+function EmptyRow({ children }: { children: React.ReactNode }) {
+  return (
+    <p className="mt-5 rounded-lg border border-dashed border-line-strong px-5 py-6 text-small text-ink-soft">
+      {children}
+    </p>
+  );
+}
+
 function SectionHeading({ title, href, linkLabel }: { title: string; href: string; linkLabel: string }) {
   return (
-    <div className="flex flex-wrap items-baseline justify-between gap-x-6 gap-y-2">
+    <div className="flex flex-wrap items-end justify-between gap-x-6 gap-y-1 border-b border-line pb-3">
       <h2 className="type-section">{title}</h2>
-      <Link href={href} className="link text-small">
+      <Link
+        href={href}
+        className="group inline-flex items-center gap-1 text-small font-medium text-ink-soft transition-colors hover:text-ink"
+      >
         {linkLabel}
+        <ChevronRight
+          aria-hidden
+          className="size-4 text-ink-faint transition-transform duration-200 group-hover:translate-x-0.5"
+        />
       </Link>
     </div>
   );
