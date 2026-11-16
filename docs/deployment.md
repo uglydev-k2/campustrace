@@ -23,18 +23,32 @@ elsewhere: the database and the uploaded files. Both have free tiers.
    `prisma migrate deploy && next build`, so every deploy applies pending
    migrations before it builds.
 2. **Database.** Any hosted Postgres works: Supabase, Neon (both free), or
-   a provider from Vercel's Storage tab. Set `DATABASE_URL` to its
-   connection string. With **Supabase**, use the *Session pooler* URI (port
-   5432): the direct connection is IPv6-only on the free plan, which Vercel
-   cannot reach. Keep the database password to letters and digits, or
-   URL-encode any special characters (`@` becomes `%40`).
+   a provider from Vercel's Storage tab. Keep the database password to
+   letters and digits, or URL-encode special characters (`@` becomes `%40`).
 
-   Hosted poolers admit only a handful of clients (Supabase's session pooler
-   allows 15), and Vercel may run many function instances at once, so the
-   app keeps a pool of just 2 connections per instance on Vercel and drops
-   idle ones after five seconds (`src/lib/db.ts`). If you ever see
-   "max clients reached", lower `DATABASE_POOL_MAX` to 1 or move to the
-   provider's transaction-mode pooler.
+   Serverless hosts start many short-lived function instances, and each
+   needs database connections. Point the app at a **transaction-mode
+   pooler**, which lets thousands of requests share a few connections, and
+   give migrations their own session-level connection:
+
+   | Variable | Supabase value | Used by |
+   | --- | --- | --- |
+   | `DATABASE_URL` | *Transaction pooler* URI, port **6543** | the running app |
+   | `DIRECT_URL` | *Session pooler* URI, port **5432** | `prisma migrate deploy` during the build |
+
+   Do not use Supabase's session pooler as `DATABASE_URL` on Vercel: it
+   admits 15 clients in total, and a few quick page loads exhaust it
+   ("max clients reached in session mode"). Do not use the *direct*
+   connection either: on the free plan it is IPv6-only, which Vercel cannot
+   reach. Do not add `?pgbouncer=true`: the app talks to Postgres through
+   the `pg` driver, which does not need it.
+
+   The app is tested through a transaction-mode pooler (pgbouncer with three
+   server connections): every workflow transaction, including the
+   `SELECT ... FOR UPDATE` row locks, runs inside one database transaction
+   and so stays on one connection. Each instance also keeps at most two
+   connections and drops idle ones after five seconds (`src/lib/db.ts`).
+
 3. **Uploads.** Open **Storage → Create → Blob** and set the access to
    **Private**. Connecting it gives the deployment permission to read and
    write the store. Then add the environment variables
