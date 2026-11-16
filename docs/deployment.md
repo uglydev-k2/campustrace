@@ -19,9 +19,9 @@ Vercel runs the app as serverless functions, so two things must live
 elsewhere: the database and the uploaded files. Both have free tiers.
 
 1. **Push the repository to GitHub** and import it at vercel.com/new. Keep
-   the detected framework (Next.js); `vercel.json` sets the build command to
-   `prisma migrate deploy && next build`, so every deploy applies pending
-   migrations before it builds.
+   the detected framework (Next.js). The build (`npm run vercel-build`)
+   only builds the app; it does not connect to the database, so a busy or
+   unreachable database can never leave a deploy hanging.
 2. **Database.** Any hosted Postgres works: Supabase, Neon (both free), or
    a provider from Vercel's Storage tab. Keep the database password to
    letters and digits, or URL-encode special characters (`@` becomes `%40`).
@@ -34,7 +34,7 @@ elsewhere: the database and the uploaded files. Both have free tiers.
    | Variable | Supabase value | Used by |
    | --- | --- | --- |
    | `DATABASE_URL` | *Transaction pooler* URI, port **6543** | the running app |
-   | `DIRECT_URL` | *Session pooler* URI, port **5432** | `prisma migrate deploy` during the build |
+   | `DIRECT_URL` | *Session pooler* URI, port **5432** | `prisma migrate deploy`, run from your laptop |
 
    Do not use Supabase's session pooler as `DATABASE_URL` on Vercel: it
    admits 15 clients in total, and a few quick page loads exhaust it
@@ -58,9 +58,13 @@ elsewhere: the database and the uploaded files. Both have free tiers.
    - `NEXTAUTH_SECRET`: output of `openssl rand -base64 32`
    - `NEXTAUTH_URL`: the site's address, e.g. `https://campustrace.vercel.app`
    - `ALLOWED_EMAIL_DOMAINS`: `stu.ucc.edu.gh,ucc.edu.gh`
-5. **Deploy**, then load the demo data once from your laptop, pointing the
-   seed at the hosted database:
-   `DATABASE_URL="<the Neon URL>" npm run db:seed`
+5. **Create the tables** once from your laptop, using the session-level
+   address (`DIRECT_URL`, port 5432 on Supabase), then load the demo data:
+   `DATABASE_URL="<session URL>" npm run db:deploy`
+   `DATABASE_URL="<session URL>" npm run db:seed`
+   Then **deploy**. Whenever a later change adds a file under
+   `prisma/migrations`, run the `db:deploy` command again before or right
+   after pushing it.
 
 After that, every push to `main` redeploys. The seed replaces all data, so do
 not run it again once real reports exist.
